@@ -1,11 +1,11 @@
-.PHONY: setup gen check format analyze test run build
+.PHONY: setup gen check format analyze test run build perf
 
 setup:
 	flutter pub get
-	dart run build_runner build --delete-conflicting-outputs
+	dart run build_runner build
 
 gen:
-	dart run build_runner watch --delete-conflicting-outputs
+	dart run build_runner watch
 
 format:
 	dart format lib test
@@ -20,6 +20,9 @@ analyze:
 
 test:
 	flutter test
+
+perf:
+	flutter test test/database/performance_test.dart --dart-define=RUN_PERF=true
 
 run:
 	flutter run

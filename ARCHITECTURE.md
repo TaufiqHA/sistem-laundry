@@ -31,10 +31,26 @@ Paket khusus fase lanjut (printer, kamera, PDF, notifikasi) sengaja belum ditamb
 - **Qty** disimpan sebagai `int` dalam satuan 1/1000 (2,5 kg = `2500`). Pembulatan hanya terjadi saat tampil, bukan saat simpan.
 - **Waktu** disimpan UTC, ditampilkan dalam waktu lokal perangkat.
 - **ID** memakai `int autoincrement`. Restore backup mengganti seluruh database, jadi ID tetap konsisten.
+- **Enum** disimpan sebagai index (`intEnum`). Jangan mengubah urutan nilai enum setelah ada data; tambah nilai baru hanya di akhir.
 - **Soft delete** lewat kolom `dihapus_pada` untuk order dan pembayaran; layanan dinonaktifkan lewat `aktif`, tidak dihapus.
 - **Transaksi** wajib untuk perubahan yang menyentuh lebih dari satu tabel (order + item + riwayat status, pembayaran + status).
 - **Piutang** tidak disimpan sebagai kolom, selalu dihitung `total − pembayaran aktif`.
 - **Snapshot** nama layanan, harga satuan, dan total disalin ke order agar perubahan harga tidak mengubah riwayat.
+
+## Database
+
+| Item | Nilai |
+| --- | --- |
+| File | `app_flutter/laundry.sqlite` (dokumen aplikasi) |
+| Mode | WAL, `PRAGMA foreign_keys = ON` setiap koneksi |
+| Versi skema | `1` |
+| Pembuatan | `main()` membuka database sebelum layar pertama agar migrasi selesai lebih dulu |
+| Kode generate | `lib/core/database/app_database.g.dart` di-commit; jalankan `make gen` setelah mengubah tabel |
+| Pengisi data contoh | `DevSeeder` (khusus debug/test) |
+
+Uji performa dengan `make perf`: 50.000 order di memori, seed ±3 detik, pencarian nota/telepon dan ringkasan harian 1-5 ms. Angka di perangkat nyata perlu diukur ulang di Fase 14.
+
+Tipe enum dan `nowUtc` diimpor di `app_database.dart` karena file generate berstatus `part` dan hanya melihat import library induknya.
 
 ## Lapisan
 

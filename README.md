@@ -4,7 +4,7 @@ Aplikasi Android untuk pemilik laundry kecil: catat order, cetak nota dan label 
 
 ## Status
 
-Fase 1 (setup proyek) selesai: kerangka aplikasi, tema, navigasi, log lokal. Fitur bisnis menyusul sesuai [Urutan Pengembangan](Urutan%20Pengembangan.md).
+Fase 1 (setup proyek) dan Fase 2 (fondasi data) selesai: kerangka aplikasi, tema, navigasi, log lokal, skema database lengkap, util uang/qty, dan repository pengaturan. Fitur bisnis menyusul sesuai [Urutan Pengembangan](Urutan%20Pengembangan.md).
 
 ## Menjalankan
 

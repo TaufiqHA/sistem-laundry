@@ -17,6 +17,7 @@ class ServicesScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Layanan & harga')),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'service-add-fab',
         onPressed: () => _openForm(context, ref, null),
         icon: const Icon(Icons.add),
         label: const Text('Tambah'),

@@ -36,6 +36,7 @@ Paket khusus fase lanjut (printer, kamera, PDF, notifikasi) sengaja belum ditamb
 - **Transaksi** wajib untuk perubahan yang menyentuh lebih dari satu tabel (order + item + riwayat status, pembayaran + status).
 - **Piutang** tidak disimpan sebagai kolom, selalu dihitung `total − pembayaran aktif`.
 - **Snapshot** nama layanan, harga satuan, dan total disalin ke order agar perubahan harga tidak mengubah riwayat.
+- **Telepon pelanggan** disimpan ternormalisasi `62...`; tampilan memakai awalan `0` lewat `PhoneNumber.display`.
 
 ## Database
 

@@ -9,14 +9,7 @@ class ScanScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Scan label'),
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          tooltip: AppStrings.close,
-          onPressed: () => Navigator.of(context).maybePop(),
-        ),
-      ),
+      appBar: AppBar(title: const Text(AppStrings.scan)),
       body: const EmptyState(
         icon: Icons.qr_code_scanner,
         title: 'Pemindai belum aktif',

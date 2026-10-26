@@ -4,7 +4,7 @@ part of 'app_database.dart';
 
 // ignore_for_file: type=lint
 class $CustomersTable extends Customers
-    with TableInfo<$CustomersTable, Customer> {
+    with TableInfo<$CustomersTable, CustomerRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -108,7 +108,7 @@ class $CustomersTable extends Customers
   static const String $name = 'customers';
   @override
   VerificationContext validateIntegrity(
-    Insertable<Customer> instance, {
+    Insertable<CustomerRow> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -162,9 +162,9 @@ class $CustomersTable extends Customers
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Customer map(Map<String, dynamic> data, {String? tablePrefix}) {
+  CustomerRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Customer(
+    return CustomerRow(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}id'],
@@ -202,7 +202,7 @@ class $CustomersTable extends Customers
   }
 }
 
-class Customer extends DataClass implements Insertable<Customer> {
+class CustomerRow extends DataClass implements Insertable<CustomerRow> {
   final int id;
   final String nama;
 
@@ -212,7 +212,7 @@ class Customer extends DataClass implements Insertable<Customer> {
   final String? catatan;
   final int poin;
   final DateTime dibuatPada;
-  const Customer({
+  const CustomerRow({
     required this.id,
     required this.nama,
     required this.telepon,
@@ -254,12 +254,12 @@ class Customer extends DataClass implements Insertable<Customer> {
     );
   }
 
-  factory Customer.fromJson(
+  factory CustomerRow.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Customer(
+    return CustomerRow(
       id: serializer.fromJson<int>(json['id']),
       nama: serializer.fromJson<String>(json['nama']),
       telepon: serializer.fromJson<String>(json['telepon']),
@@ -283,7 +283,7 @@ class Customer extends DataClass implements Insertable<Customer> {
     };
   }
 
-  Customer copyWith({
+  CustomerRow copyWith({
     int? id,
     String? nama,
     String? telepon,
@@ -291,7 +291,7 @@ class Customer extends DataClass implements Insertable<Customer> {
     Value<String?> catatan = const Value.absent(),
     int? poin,
     DateTime? dibuatPada,
-  }) => Customer(
+  }) => CustomerRow(
     id: id ?? this.id,
     nama: nama ?? this.nama,
     telepon: telepon ?? this.telepon,
@@ -300,8 +300,8 @@ class Customer extends DataClass implements Insertable<Customer> {
     poin: poin ?? this.poin,
     dibuatPada: dibuatPada ?? this.dibuatPada,
   );
-  Customer copyWithCompanion(CustomersCompanion data) {
-    return Customer(
+  CustomerRow copyWithCompanion(CustomersCompanion data) {
+    return CustomerRow(
       id: data.id.present ? data.id.value : this.id,
       nama: data.nama.present ? data.nama.value : this.nama,
       telepon: data.telepon.present ? data.telepon.value : this.telepon,
@@ -316,7 +316,7 @@ class Customer extends DataClass implements Insertable<Customer> {
 
   @override
   String toString() {
-    return (StringBuffer('Customer(')
+    return (StringBuffer('CustomerRow(')
           ..write('id: $id, ')
           ..write('nama: $nama, ')
           ..write('telepon: $telepon, ')
@@ -334,7 +334,7 @@ class Customer extends DataClass implements Insertable<Customer> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Customer &&
+      (other is CustomerRow &&
           other.id == this.id &&
           other.nama == this.nama &&
           other.telepon == this.telepon &&
@@ -344,7 +344,7 @@ class Customer extends DataClass implements Insertable<Customer> {
           other.dibuatPada == this.dibuatPada);
 }
 
-class CustomersCompanion extends UpdateCompanion<Customer> {
+class CustomersCompanion extends UpdateCompanion<CustomerRow> {
   final Value<int> id;
   final Value<String> nama;
   final Value<String> telepon;
@@ -371,7 +371,7 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
     this.dibuatPada = const Value.absent(),
   }) : nama = Value(nama),
        telepon = Value(telepon);
-  static Insertable<Customer> custom({
+  static Insertable<CustomerRow> custom({
     Expression<int>? id,
     Expression<String>? nama,
     Expression<String>? telepon,
@@ -4477,7 +4477,7 @@ typedef $$CustomersTableUpdateCompanionBuilder = CustomersCompanion Function({
 });
 
 final class $$CustomersTableReferences
-    extends BaseReferences<_$AppDatabase, $CustomersTable, Customer> {
+    extends BaseReferences<_$AppDatabase, $CustomersTable, CustomerRow> {
   $$CustomersTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static MultiTypedResultKey<$OrdersTable, List<Order>> _ordersRefsTable(
@@ -4678,14 +4678,14 @@ class $$CustomersTableTableManager
         RootTableManager<
           _$AppDatabase,
           $CustomersTable,
-          Customer,
+          CustomerRow,
           $$CustomersTableFilterComposer,
           $$CustomersTableOrderingComposer,
           $$CustomersTableAnnotationComposer,
           $$CustomersTableCreateCompanionBuilder,
           $$CustomersTableUpdateCompanionBuilder,
-          (Customer, $$CustomersTableReferences),
-          Customer,
+          (CustomerRow, $$CustomersTableReferences),
+          CustomerRow,
           PrefetchHooks Function({bool ordersRefs})
         > {
   $$CustomersTableTableManager(_$AppDatabase db, $CustomersTable table)
@@ -4738,7 +4738,7 @@ class $$CustomersTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable<$CustomersTable, Customer>(table),
+                  e.readTable<$CustomersTable, CustomerRow>(table),
                   $$CustomersTableReferences(db, table, e),
                 ),
               )
@@ -4752,7 +4752,7 @@ class $$CustomersTableTableManager
                 return [
                   if (ordersRefs)
                     await $_getPrefetchedDataByColumns<
-                      Customer,
+                      CustomerRow,
                       $CustomersTable,
                       Order,
                       $OrdersTable
@@ -4778,14 +4778,14 @@ typedef $$CustomersTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
       $CustomersTable,
-      Customer,
+      CustomerRow,
       $$CustomersTableFilterComposer,
       $$CustomersTableOrderingComposer,
       $$CustomersTableAnnotationComposer,
       $$CustomersTableCreateCompanionBuilder,
       $$CustomersTableUpdateCompanionBuilder,
-      (Customer, $$CustomersTableReferences),
-      Customer,
+      (CustomerRow, $$CustomersTableReferences),
+      CustomerRow,
       PrefetchHooks Function({bool ordersRefs})
     >;
 typedef $$ServicesTableCreateCompanionBuilder = ServicesCompanion Function({

@@ -54,12 +54,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Pemindai belum aktif'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.close));
-    await tester.pumpAndSettle();
-    expect(find.text('Belum ada laporan'), findsOneWidget);
-
     await tester.tap(find.text('Beranda'));
     await tester.pumpAndSettle();
+    expect(find.text('Belum ada aktivitas'), findsOneWidget);
+
     await tester.tap(find.byIcon(Icons.settings_outlined));
     await tester.pumpAndSettle();
     expect(find.text('Profil usaha'), findsOneWidget);

@@ -2,7 +2,7 @@ import 'package:drift/drift.dart';
 
 import 'package:sistem_manajemen_laundry/core/utils/clock.dart';
 
-@DataClassName('Customer')
+@DataClassName('CustomerRow')
 @TableIndex(name: 'idx_customers_nama', columns: {#nama})
 @TableIndex(name: 'idx_customers_telepon', columns: {#telepon})
 class Customers extends Table {

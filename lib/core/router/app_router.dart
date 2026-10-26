@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import 'package:sistem_manajemen_laundry/core/widgets/app_shell.dart';
+import 'package:sistem_manajemen_laundry/features/customer/presentation/customer_detail_page.dart';
 import 'package:sistem_manajemen_laundry/features/customer/presentation/customers_screen.dart';
 import 'package:sistem_manajemen_laundry/features/home/presentation/home_screen.dart';
 import 'package:sistem_manajemen_laundry/features/order/presentation/orders_screen.dart';
@@ -21,6 +22,8 @@ abstract final class AppRoutes {
   static const businessProfile = '/pengaturan/profil';
   static const services = '/layanan';
   static const scan = '/scan';
+
+  static String customerDetail(int id) => '/pelanggan/$id';
 }
 
 GoRouter createRouter({String initialLocation = AppRoutes.home}) {
@@ -59,6 +62,14 @@ GoRouter createRouter({String initialLocation = AppRoutes.home}) {
           StatefulShellBranch(
             routes: [
               GoRoute(
+                path: AppRoutes.scan,
+                builder: (context, state) => const ScanScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
                 path: AppRoutes.reports,
                 builder: (context, state) => const ReportsScreen(),
               ),
@@ -73,10 +84,6 @@ GoRouter createRouter({String initialLocation = AppRoutes.home}) {
         builder: (context, state) => const OnboardingScreen(),
       ),
       GoRoute(
-        path: AppRoutes.scan,
-        builder: (context, state) => const ScanScreen(),
-      ),
-      GoRoute(
         path: AppRoutes.settings,
         builder: (context, state) => const SettingsScreen(),
       ),
@@ -87,6 +94,13 @@ GoRouter createRouter({String initialLocation = AppRoutes.home}) {
       GoRoute(
         path: AppRoutes.services,
         builder: (context, state) => const ServicesScreen(),
+      ),
+      GoRoute(
+        path: '/pelanggan/:id',
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '');
+          return CustomerDetailPage(customerId: id ?? -1);
+        },
       ),
     ],
   );

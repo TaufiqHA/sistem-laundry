@@ -49,4 +49,52 @@ void main() {
     expect(all, hasLength(2));
     expect(all[SettingKeys.businessName], 'Laundry Bersih');
   });
+
+  test('load memakai nilai bawaan saat database masih kosong', () async {
+    final settings = await repository.load();
+
+    expect(settings.businessName, isEmpty);
+    expect(settings.notaFormat, 'LDR-{tanggal}-{urut}');
+    expect(settings.labelSize, '58x40');
+    expect(settings.overdueDays, 7);
+    expect(settings.onboardingDone, isFalse);
+    expect(settings.hasBusinessName, isFalse);
+  });
+
+  test('menyimpan profil usaha dan membacanya lewat load', () async {
+    await repository.saveBusiness(
+      name: '  Laundry Bersih  ',
+      phone: '08123456789',
+      address: 'Jalan Melati 3',
+      receiptFooter: 'Terima kasih',
+    );
+
+    final settings = await repository.load();
+    expect(settings.businessName, 'Laundry Bersih');
+    expect(settings.businessPhone, '08123456789');
+    expect(settings.businessAddress, 'Jalan Melati 3');
+    expect(settings.receiptFooter, 'Terima kasih');
+    expect(settings.displayName, 'Laundry Bersih');
+    expect(settings.hasBusinessName, isTrue);
+  });
+
+  test('format nota, ukuran label, dan batas hari tersimpan', () async {
+    await repository.setNotaFormat('INV-{tanggal}-{urut}');
+    await repository.setLabelSize('58x30');
+    await repository.setOverdueDays(10);
+
+    final settings = await repository.load();
+    expect(settings.notaFormat, 'INV-{tanggal}-{urut}');
+    expect(settings.labelSize, '58x30');
+    expect(settings.overdueDays, 10);
+  });
+
+  test('menandai onboarding selesai', () async {
+    expect(await repository.isOnboardingDone(), isFalse);
+
+    await repository.completeOnboarding();
+
+    expect(await repository.isOnboardingDone(), isTrue);
+    expect((await repository.load()).onboardingDone, isTrue);
+  });
 }

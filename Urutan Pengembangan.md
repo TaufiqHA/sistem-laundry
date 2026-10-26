@@ -2,7 +2,7 @@
 
 Dokumen ini berisi urutan pengerjaan, bukan jadwal. Satu fase diselesaikan dan bisa dijalankan di HP sebelum fase berikutnya dimulai, kecuali ditandai boleh paralel. Rujukan `FR-xx` mengacu ke PRD.
 
-**Status:** Fase 1 dan 2 selesai. Fase 0.3 (spike printer) menunggu perangkat fisik. Berikutnya Fase 3.
+**Status:** Fase 1, 2, dan 3 selesai. Fase 0.3 (spike printer) menunggu perangkat fisik. Berikutnya Fase 4.
 
 ## Prinsip urutan
 

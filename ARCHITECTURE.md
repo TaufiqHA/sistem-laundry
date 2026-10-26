@@ -88,7 +88,7 @@ Di dalam fitur, folder mengikuti kebutuhan: `presentation/`, `domain/`, `data/`.
 
 ## Konvensi
 
-- Teks UI ada di `lib/core/l10n/app_strings.dart`. Saat multi-bahasa dikerjakan, file ini menjadi titik migrasi ke ARB.
+- Teks yang dipakai lintas layar ada di `lib/core/l10n/app_strings.dart`; teks khas satu fitur ditulis di file fitur itu. Saat multi-bahasa dikerjakan, keduanya menjadi titik migrasi ke ARB.
 - Setiap layar wajib punya keadaan kosong, memuat, dan gagal. `EmptyState` dipakai untuk keadaan kosong.
 - Placeholder `ComingSoon` hanya boleh ada selama fase pengembangan dan dihapus saat fiturnya dikerjakan.
 - Nama file `snake_case`, nama kelas `PascalCase`, satu widget utama per file.

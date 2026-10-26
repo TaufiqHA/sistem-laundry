@@ -1,4 +1,5 @@
 import 'package:sistem_manajemen_laundry/core/database/app_database.dart';
+import 'package:sistem_manajemen_laundry/features/settings/domain/app_settings.dart';
 
 /// Kunci pengaturan yang dipakai lintas fitur. Nilai disimpan sebagai
 /// teks; konversi tipe dilakukan di repository ini.
@@ -11,6 +12,7 @@ abstract final class SettingKeys {
   static const labelSize = 'label_ukuran';
   static const overdueDays = 'batas_hari_belum_diambil';
   static const lastBackupAt = 'backup_terakhir';
+  static const onboardingDone = 'onboarding_selesai';
 }
 
 class SettingsRepository {
@@ -52,5 +54,54 @@ class SettingsRepository {
   Future<Map<String, String>> all() async {
     final rows = await _db.select(_db.settings).get();
     return {for (final row in rows) row.kunci: row.nilai};
+  }
+
+  Future<AppSettings> load() async {
+    final values = await all();
+    return AppSettings(
+      businessName: values[SettingKeys.businessName] ?? '',
+      businessPhone: values[SettingKeys.businessPhone] ?? '',
+      businessAddress: values[SettingKeys.businessAddress] ?? '',
+      receiptFooter: values[SettingKeys.receiptFooter] ?? '',
+      notaFormat:
+          values[SettingKeys.notaFormat] ?? AppSettings.defaultNotaFormat,
+      labelSize: values[SettingKeys.labelSize] ?? AppSettings.defaultLabelSize,
+      overdueDays:
+          int.tryParse(values[SettingKeys.overdueDays] ?? '') ??
+          AppSettings.defaultOverdueDays,
+      onboardingDone: values[SettingKeys.onboardingDone] == '1',
+    );
+  }
+
+  Future<void> saveBusiness({
+    required String name,
+    required String phone,
+    required String address,
+    required String receiptFooter,
+  }) async {
+    await set(SettingKeys.businessName, name.trim());
+    await set(SettingKeys.businessPhone, phone.trim());
+    await set(SettingKeys.businessAddress, address.trim());
+    await set(SettingKeys.receiptFooter, receiptFooter.trim());
+  }
+
+  Future<void> setNotaFormat(String format) {
+    return set(SettingKeys.notaFormat, format.trim());
+  }
+
+  Future<void> setLabelSize(String size) {
+    return set(SettingKeys.labelSize, size);
+  }
+
+  Future<void> setOverdueDays(int days) {
+    return setInt(SettingKeys.overdueDays, days);
+  }
+
+  Future<void> completeOnboarding() {
+    return set(SettingKeys.onboardingDone, '1');
+  }
+
+  Future<bool> isOnboardingDone() async {
+    return await get(SettingKeys.onboardingDone) == '1';
   }
 }

@@ -10,6 +10,9 @@ abstract final class Rupiah {
     return '${sign}Rp ${_decimal.format(amount.abs())}';
   }
 
+  /// Tanpa awalan `Rp`, untuk mengisi kolom input: `25.000`.
+  static String formatPlain(int amount) => _decimal.format(amount.abs());
+
   /// Membaca input kasir. Titik dianggap pemisah ribuan, koma ditolak
   /// karena uang tidak boleh pecahan.
   ///

@@ -5,6 +5,8 @@ import 'package:sistem_manajemen_laundry/app.dart';
 import 'package:sistem_manajemen_laundry/core/database/app_database.dart';
 import 'package:sistem_manajemen_laundry/core/database/database_provider.dart';
 import 'package:sistem_manajemen_laundry/core/logging/app_logger.dart';
+import 'package:sistem_manajemen_laundry/core/router/app_router.dart';
+import 'package:sistem_manajemen_laundry/features/settings/data/settings_repository.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,10 +20,14 @@ Future<void> main() async {
   await database.customSelect('SELECT 1').get();
   AppLogger.log('Database siap (skema v${database.schemaVersion})');
 
+  final onboardingDone = await SettingsRepository(database).isOnboardingDone();
+
   runApp(
     ProviderScope(
       overrides: [databaseProvider.overrideWithValue(database)],
-      child: const LaundryApp(),
+      child: LaundryApp(
+        initialLocation: onboardingDone ? AppRoutes.home : AppRoutes.onboarding,
+      ),
     ),
   );
 }

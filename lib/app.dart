@@ -1,17 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:sistem_manajemen_laundry/core/l10n/app_strings.dart';
 import 'package:sistem_manajemen_laundry/core/router/app_router.dart';
 import 'package:sistem_manajemen_laundry/core/theme/app_theme.dart';
 import 'package:sistem_manajemen_laundry/core/theme/theme_provider.dart';
 
-class LaundryApp extends ConsumerWidget {
-  const LaundryApp({super.key});
+class LaundryApp extends ConsumerStatefulWidget {
+  const LaundryApp({super.key, this.initialLocation = AppRoutes.home});
+
+  final String initialLocation;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<LaundryApp> createState() => _LaundryAppState();
+}
+
+class _LaundryAppState extends ConsumerState<LaundryApp> {
+  // Router dibuat sekali agar state navigasi tidak hilang saat tema berubah.
+  late final GoRouter _router = createRouter(
+    initialLocation: widget.initialLocation,
+  );
+
+  @override
+  Widget build(BuildContext context) {
     final themeMode = ref.watch(themeModeProvider);
 
     return MaterialApp.router(
@@ -31,6 +44,3 @@ class LaundryApp extends ConsumerWidget {
     );
   }
 }
-
-// Router dibuat sekali agar state navigasi tidak hilang saat rebuild tema.
-final _router = createRouter();

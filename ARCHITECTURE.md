@@ -36,6 +36,8 @@ Paket khusus fase lanjut (printer, kamera, PDF, notifikasi) sengaja belum ditamb
 - **Transaksi** wajib untuk perubahan yang menyentuh lebih dari satu tabel (order + item + riwayat status, pembayaran + status).
 - **Piutang** tidak disimpan sebagai kolom, selalu dihitung `total − pembayaran aktif`.
 - **Snapshot** nama layanan, harga satuan, dan total disalin ke order agar perubahan harga tidak mengubah riwayat.
+- **Nomor nota** memakai counter per tanggal lokal (`{tanggal}` = `yyyyMMdd`, `{urut}` = tiga digit) dan dibuat di transaksi yang sama dengan order, sehingga dua order berturut-turut tidak mungkin mendapat nomor sama.
+- **Subtotal item** = `(qtyMilli × hargaSatuan + 500) ~/ 1000`, dibulatkan ke rupiah terdekat di satu tempat.
 - **Telepon pelanggan** disimpan ternormalisasi `62...`; tampilan memakai awalan `0` lewat `PhoneNumber.display`.
 
 ## Database

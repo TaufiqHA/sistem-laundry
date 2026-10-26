@@ -4,6 +4,8 @@ import 'package:sistem_manajemen_laundry/core/widgets/app_shell.dart';
 import 'package:sistem_manajemen_laundry/features/customer/presentation/customer_detail_page.dart';
 import 'package:sistem_manajemen_laundry/features/customer/presentation/customers_screen.dart';
 import 'package:sistem_manajemen_laundry/features/home/presentation/home_screen.dart';
+import 'package:sistem_manajemen_laundry/features/order/presentation/order_detail_page.dart';
+import 'package:sistem_manajemen_laundry/features/order/presentation/order_form_page.dart';
 import 'package:sistem_manajemen_laundry/features/order/presentation/orders_screen.dart';
 import 'package:sistem_manajemen_laundry/features/report/presentation/reports_screen.dart';
 import 'package:sistem_manajemen_laundry/features/scan/presentation/scan_screen.dart';
@@ -22,8 +24,13 @@ abstract final class AppRoutes {
   static const businessProfile = '/pengaturan/profil';
   static const services = '/layanan';
   static const scan = '/scan';
+  static const orderForm = '/order/baru';
 
   static String customerDetail(int id) => '/pelanggan/$id';
+
+  static String orderDetail(int id) => '/order/$id';
+
+  static String orderEdit(int id) => '/order/$id/ubah';
 }
 
 GoRouter createRouter({String initialLocation = AppRoutes.home}) {
@@ -100,6 +107,24 @@ GoRouter createRouter({String initialLocation = AppRoutes.home}) {
         builder: (context, state) {
           final id = int.tryParse(state.pathParameters['id'] ?? '');
           return CustomerDetailPage(customerId: id ?? -1);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.orderForm,
+        builder: (context, state) => const OrderFormPage(),
+      ),
+      GoRoute(
+        path: '/order/:id/ubah',
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '');
+          return OrderFormPage(orderId: id);
+        },
+      ),
+      GoRoute(
+        path: '/order/:id',
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '');
+          return OrderDetailPage(orderId: id ?? -1);
         },
       ),
     ],

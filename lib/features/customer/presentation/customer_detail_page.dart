@@ -6,6 +6,8 @@ import 'package:sistem_manajemen_laundry/core/utils/rupiah.dart';
 import 'package:sistem_manajemen_laundry/features/customer/domain/customer.dart';
 import 'package:sistem_manajemen_laundry/features/customer/presentation/customer_form_sheet.dart';
 import 'package:sistem_manajemen_laundry/features/customer/presentation/customer_providers.dart';
+import 'package:sistem_manajemen_laundry/features/order/presentation/order_providers.dart';
+import 'package:sistem_manajemen_laundry/features/order/presentation/order_widgets.dart';
 
 class CustomerDetailPage extends ConsumerWidget {
   const CustomerDetailPage({required this.customerId, super.key});
@@ -51,13 +53,7 @@ class CustomerDetailPage extends ConsumerWidget {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
-              const Card(
-                child: ListTile(
-                  leading: Icon(Icons.history),
-                  title: Text('Belum ada order'),
-                  subtitle: Text('Order pelanggan ini akan muncul di sini.'),
-                ),
-              ),
+              _OrderHistory(customerId: customerId),
             ],
           );
         },
@@ -70,14 +66,14 @@ class CustomerDetailPage extends ConsumerWidget {
     WidgetRef ref,
     Customer customer,
   ) async {
-    final saved = await showModalBottomSheet<bool>(
+    final savedId = await showModalBottomSheet<int>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       showDragHandle: true,
       builder: (_) => CustomerFormSheet(customer: customer),
     );
-    if (saved ?? false) {
+    if (savedId != null) {
       ref.invalidate(customerDetailProvider(customerId));
       ref.invalidate(customerSummaryProvider(customerId));
       ref.invalidate(customerSearchProvider);
@@ -253,6 +249,52 @@ class _SummaryRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _OrderHistory extends ConsumerWidget {
+  const _OrderHistory({required this.customerId});
+
+  final int customerId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final orders = ref.watch(customerOrdersProvider(customerId));
+
+    return orders.when(
+      loading: () => const Card(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ),
+      error: (error, stack) => const Card(
+        child: ListTile(
+          leading: Icon(Icons.history),
+          title: Text('Gagal memuat riwayat order.'),
+        ),
+      ),
+      data: (orders) {
+        if (orders.isEmpty) {
+          return const Card(
+            child: ListTile(
+              leading: Icon(Icons.history),
+              title: Text('Belum ada order'),
+              subtitle: Text('Order pelanggan ini akan muncul di sini.'),
+            ),
+          );
+        }
+        return Column(
+          children: [
+            for (final order in orders)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: OrderCard(order: order, showCustomer: false),
+              ),
+          ],
+        );
+      },
     );
   }
 }

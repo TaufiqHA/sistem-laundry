@@ -67,14 +67,16 @@ class _CustomerFormSheetState extends ConsumerState<CustomerFormSheet> {
       }
       setState(() => _saving = true);
 
+      final int savedId;
       if (widget.customer == null) {
-        await repository.create(
+        savedId = await repository.create(
           nama: _name.text,
           telepon: _phone.text,
           alamat: _address.text,
           catatan: _notes.text,
         );
       } else {
+        savedId = widget.customer!.id;
         await repository.update(
           id: widget.customer!.id,
           nama: _name.text,
@@ -84,7 +86,7 @@ class _CustomerFormSheetState extends ConsumerState<CustomerFormSheet> {
         );
       }
       if (mounted) {
-        Navigator.of(context).pop(true);
+        Navigator.of(context).pop(savedId);
       }
     } on Exception {
       if (mounted) {

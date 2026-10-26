@@ -147,14 +147,14 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
     WidgetRef ref,
     Customer? customer,
   ) async {
-    final saved = await showModalBottomSheet<bool>(
+    final savedId = await showModalBottomSheet<int>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       showDragHandle: true,
       builder: (_) => CustomerFormSheet(customer: customer),
     );
-    if (saved ?? false) {
+    if (savedId != null) {
       ref.invalidate(customerSearchProvider);
     }
   }

@@ -70,7 +70,7 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: OutlinedButton.icon(
+                  child: FilledButton.icon(
                     onPressed: () => context.push(AppRoutes.scan),
                     icon: const Icon(Icons.qr_code_scanner),
                     label: const Text('Scan label'),

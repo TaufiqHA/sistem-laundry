@@ -10,6 +10,7 @@ import 'package:sistem_manajemen_laundry/core/utils/rupiah.dart';
 import 'package:sistem_manajemen_laundry/core/utils/tanggal.dart';
 import 'package:sistem_manajemen_laundry/features/order/domain/order_models.dart';
 import 'package:sistem_manajemen_laundry/features/order/domain/order_status.dart';
+import 'package:sistem_manajemen_laundry/features/order/domain/scan_result.dart';
 import 'package:sistem_manajemen_laundry/features/order/domain/status_change_source.dart';
 import 'package:sistem_manajemen_laundry/features/settings/data/settings_repository.dart';
 
@@ -186,6 +187,43 @@ class OrderRepository {
           .toList(growable: false),
       dibayar: paidRow.read<int>('dibayar'),
     );
+  }
+
+  /// Mencari order dari token QR label.
+  Future<ScanResult> lookupByToken(String token) async {
+    final row = await (_db.select(
+      _db.orders,
+    )..where((table) => table.qrToken.equals(token))).getSingleOrNull();
+    return _scanResultFor(row);
+  }
+
+  /// Jalan darurat saat label rusak: cari dengan nomor nota.
+  Future<ScanResult> lookupByNota(String nota) async {
+    final value = nota.trim();
+    if (value.isEmpty) {
+      return const ScanResult(ScanOutcome.tidakDikenal);
+    }
+    final row = await (_db.select(
+      _db.orders,
+    )..where((table) => table.nomorNota.equals(value))).getSingleOrNull();
+    return _scanResultFor(row);
+  }
+
+  Future<ScanResult> _scanResultFor(Order? row) async {
+    if (row == null) {
+      return const ScanResult(ScanOutcome.tidakDikenal);
+    }
+    final detail = await getDetail(row.id);
+    if (detail == null) {
+      return const ScanResult(ScanOutcome.tidakDikenal);
+    }
+    if (row.dihapusPada != null) {
+      return ScanResult(ScanOutcome.dibatalkan, detail: detail);
+    }
+    if (detail.order.status == OrderStatus.diambil) {
+      return ScanResult(ScanOutcome.sudahDiambil, detail: detail);
+    }
+    return ScanResult(ScanOutcome.siap, detail: detail);
   }
 
   /// Mengubah item dan data order. Nomor nota dan token tidak berubah.

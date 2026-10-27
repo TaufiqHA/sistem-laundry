@@ -9,6 +9,7 @@ import 'package:sistem_manajemen_laundry/features/order/data/order_repository.da
 import 'package:sistem_manajemen_laundry/features/order/domain/order_models.dart';
 import 'package:sistem_manajemen_laundry/features/order/domain/order_status.dart';
 import 'package:sistem_manajemen_laundry/features/order/domain/payment_method.dart';
+import 'package:sistem_manajemen_laundry/features/order/domain/scan_result.dart';
 import 'package:sistem_manajemen_laundry/features/order/domain/status_change_source.dart';
 import 'package:sistem_manajemen_laundry/features/service/data/service_repository.dart';
 import 'package:sistem_manajemen_laundry/features/service/domain/service_unit.dart';
@@ -299,6 +300,65 @@ void main() {
       repository.undoLastStatus(id),
       throwsA(isA<OrderException>()),
     );
+  });
+
+  test('scan token menemukan order yang siap diproses', () async {
+    final id = await createOrder();
+    final detail = await repository.getDetail(id);
+
+    final result = await repository.lookupByToken(detail!.order.qrToken);
+
+    expect(result.outcome, ScanOutcome.siap);
+    expect(result.bisaDimajukan, isTrue);
+    expect(result.detail!.order.id, id);
+  });
+
+  test('scan token order yang sudah diambil tidak bisa dimajukan', () async {
+    final id = await createOrder();
+    for (var step = 0; step < 3; step++) {
+      await repository.advanceStatus(id);
+    }
+    final token = (await repository.getDetail(id))!.order.qrToken;
+
+    final result = await repository.lookupByToken(token);
+
+    expect(result.outcome, ScanOutcome.sudahDiambil);
+    expect(result.bisaDimajukan, isFalse);
+  });
+
+  test('scan token order batal dikenali', () async {
+    final id = await createOrder();
+    final token = (await repository.getDetail(id))!.order.qrToken;
+    await repository.cancel(id);
+
+    final result = await repository.lookupByToken(token);
+
+    expect(result.outcome, ScanOutcome.dibatalkan);
+  });
+
+  test('scan token asing tidak ditemukan', () async {
+    final result = await repository.lookupByToken('TOKENASING99');
+    expect(result.outcome, ScanOutcome.tidakDikenal);
+    expect(result.detail, isNull);
+  });
+
+  test('nomor nota bisa dipakai saat label rusak', () async {
+    final id = await createOrder();
+    final nota = (await repository.getDetail(id))!.order.nomorNota;
+
+    final result = await repository.lookupByNota(nota);
+
+    expect(result.outcome, ScanOutcome.siap);
+    expect(result.detail!.order.id, id);
+  });
+
+  test('perubahan dari scan tercatat di riwayat', () async {
+    final id = await createOrder();
+    await repository.advanceStatus(id, source: StatusChangeSource.scan);
+
+    final detail = await repository.getDetail(id);
+    expect(detail!.history.last.sumber, StatusChangeSource.scan);
+    expect(detail.order.status, OrderStatus.diproses);
   });
 }
 

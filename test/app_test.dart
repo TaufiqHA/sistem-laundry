@@ -50,10 +50,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Belum ada laporan'), findsOneWidget);
 
-    await tester.tap(find.text('Scan'));
-    await tester.pumpAndSettle();
-    expect(find.text('Pemindai belum aktif'), findsOneWidget);
-
     await tester.tap(find.text('Beranda'));
     await tester.pumpAndSettle();
     expect(find.text('Belum ada aktivitas'), findsOneWidget);

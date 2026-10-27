@@ -73,14 +73,6 @@ GoRouter createRouter({String initialLocation = AppRoutes.home}) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: AppRoutes.scan,
-                builder: (context, state) => const ScanScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
                 path: AppRoutes.reports,
                 builder: (context, state) => const ReportsScreen(),
               ),
@@ -93,6 +85,10 @@ GoRouter createRouter({String initialLocation = AppRoutes.home}) {
       GoRoute(
         path: AppRoutes.onboarding,
         builder: (context, state) => const OnboardingScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.scan,
+        builder: (context, state) => const ScanScreen(),
       ),
       GoRoute(
         path: AppRoutes.settings,

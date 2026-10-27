@@ -34,5 +34,8 @@ extension PaymentInvalidation on WidgetRef {
     invalidate(customerSummaryProvider(customerId));
     invalidate(debtsProvider);
     invalidate(totalOutstandingProvider);
+    invalidate(homeSummaryProvider);
+    invalidate(readyOrdersProvider);
+    invalidate(overdueOrdersProvider);
   }
 }

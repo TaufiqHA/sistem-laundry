@@ -36,7 +36,7 @@ void main() {
   testWidgets('empat tab, scan, dan pengaturan bisa dibuka', (tester) async {
     await pumpApp(tester);
 
-    expect(find.text('Belum ada aktivitas'), findsOneWidget);
+    expect(find.text('Order hari ini'), findsOneWidget);
 
     await tester.tap(find.text('Order'));
     await tester.pumpAndSettle();
@@ -52,7 +52,7 @@ void main() {
 
     await tester.tap(find.text('Beranda'));
     await tester.pumpAndSettle();
-    expect(find.text('Belum ada aktivitas'), findsOneWidget);
+    expect(find.text('Order hari ini'), findsOneWidget);
 
     await tester.tap(find.byIcon(Icons.settings_outlined));
     await tester.pumpAndSettle();
@@ -74,7 +74,7 @@ void main() {
     await tester.tap(find.text('Simpan dan mulai'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Belum ada aktivitas'), findsOneWidget);
+    expect(find.text('Order hari ini'), findsOneWidget);
 
     final settings = await SettingsRepository(db).load();
     expect(settings.businessName, 'Laundry Bersih');
@@ -89,7 +89,7 @@ void main() {
     await tester.tap(find.text('Isi nanti'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Belum ada aktivitas'), findsOneWidget);
+    expect(find.text('Order hari ini'), findsOneWidget);
     expect(await SettingsRepository(db).isOnboardingDone(), isTrue);
   });
 }

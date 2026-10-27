@@ -268,8 +268,7 @@ class OrderDetailPage extends ConsumerWidget {
 
   void _invalidate(WidgetRef ref) {
     ref.invalidate(orderDetailProvider(orderId));
-    ref.invalidate(orderListProvider);
-    ref.invalidate(customerOrdersProvider);
+    invalidateOrderViews(ref);
   }
 
   Future<void> _cancel(

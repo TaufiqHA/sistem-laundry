@@ -110,6 +110,9 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
       ref.invalidate(orderDetailProvider(detail.order.id));
       ref.invalidate(orderListProvider);
       ref.invalidate(customerOrdersProvider);
+      ref.invalidate(homeSummaryProvider);
+      ref.invalidate(readyOrdersProvider);
+      ref.invalidate(overdueOrdersProvider);
       if (!mounted) {
         return;
       }
@@ -126,6 +129,9 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
                 ref.invalidate(orderDetailProvider(detail.order.id));
                 ref.invalidate(orderListProvider);
                 ref.invalidate(customerOrdersProvider);
+                ref.invalidate(homeSummaryProvider);
+                ref.invalidate(readyOrdersProvider);
+                ref.invalidate(overdueOrdersProvider);
               } on Exception {
                 // Perubahan sudah tidak bisa diurungkan.
               }

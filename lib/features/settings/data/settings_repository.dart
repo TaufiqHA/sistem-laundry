@@ -74,6 +74,8 @@ class SettingsRepository {
           AppSettings.defaultPaperWidth,
       printerName: values[SettingKeys.printerName] ?? '',
       printerAddress: values[SettingKeys.printerAddress] ?? '',
+      lastBackupAt: DateTime.tryParse(values[SettingKeys.lastBackupAt] ?? '')
+          ?.toLocal(),
       overdueDays:
           int.tryParse(values[SettingKeys.overdueDays] ?? '') ??
           AppSettings.defaultOverdueDays,

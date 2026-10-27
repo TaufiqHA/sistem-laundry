@@ -2,7 +2,7 @@
 
 Dokumen ini berisi urutan pengerjaan, bukan jadwal. Satu fase diselesaikan dan bisa dijalankan di HP sebelum fase berikutnya dimulai, kecuali ditandai boleh paralel. Rujukan `FR-xx` mengacu ke PRD.
 
-**Status:** Fase 1–8 selesai. Fase 0.3, Gerbang 4, dan Gerbang 5 (cetak dan scan label fisik) menunggu perangkat. Berikutnya Fase 9.
+**Status:** Fase 1–9 selesai. Fase 0.3, Gerbang 4, dan Gerbang 5 menunggu perangkat. Berikutnya Fase 10.
 
 ## Prinsip urutan
 
@@ -79,7 +79,7 @@ Dikerjakan sebelum menulis kode aplikasi. Tujuannya menghindari perubahan mahal 
 | 1.4 | Tema Material 3, mode terang/gelap, ukuran teks dasar lebih besar, target sentuh minimal 48 dp | Toggle tema berfungsi tanpa restart |
 | 1.5 | Lokalisasi `id_ID` lewat `flutter_localizations`; semua teks UI di satu tempat | Tidak ada teks Indonesia yang ditulis langsung di widget |
 | 1.6 | `analysis_options.yaml` ketat (`strict-casts`, `avoid_print`, `prefer_const`), format otomatis, script `make check` = analyze + test | `make check` lulus di kondisi bersih |
-| 1.7 | App shell: `go_router`, bottom navigation lima tab (Beranda, Order, Pelanggan, Scan, Laporan); Pengaturan dibuka dari ikon di Beranda; halaman masih placeholder | Semua tab terbuka, tiap layar bisa punya satu FAB sendiri tanpa bertumpuk |
+| 1.7 | App shell: `go_router`, bottom navigation empat tab (Beranda, Order, Pelanggan, Laporan) + tombol Scan di tengah yang membuka layar penuh; Pengaturan dibuka dari ikon di Beranda; halaman masih placeholder | Semua tab terbuka, kamera hanya hidup saat layar Scan dibuka |
 | 1.8 | Penanganan error global: `FlutterError.onError` + `PlatformDispatcher.onError`, log ke file lokal | Error buatan tercatat di file, aplikasi tidak mati diam-diam |
 | 1.9 | Build release pertama, ukur ukuran APK | APK terpasang di HP uji, ukuran tercatat sebagai baseline (< 30 MB) |
 

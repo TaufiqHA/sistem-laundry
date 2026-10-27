@@ -2,9 +2,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:sistem_manajemen_laundry/core/database/database_provider.dart';
 import 'package:sistem_manajemen_laundry/features/order/data/order_repository.dart';
+import 'package:sistem_manajemen_laundry/features/order/domain/home_summary.dart';
 import 'package:sistem_manajemen_laundry/features/order/domain/order_models.dart';
 import 'package:sistem_manajemen_laundry/features/service/domain/laundry_service.dart';
 import 'package:sistem_manajemen_laundry/features/service/presentation/service_providers.dart';
+import 'package:sistem_manajemen_laundry/features/settings/presentation/settings_providers.dart';
 
 final orderRepositoryProvider = Provider<OrderRepository>((ref) {
   return OrderRepository(ref.watch(databaseProvider));
@@ -35,3 +37,37 @@ final activeServicesProvider = FutureProvider.autoDispose<List<LaundryService>>(
     return ref.watch(serviceRepositoryProvider).list(includeInactive: false);
   },
 );
+
+final homeSummaryProvider = FutureProvider.autoDispose<HomeSummary>((
+  ref,
+) async {
+  final settings = await ref.watch(settingsRepositoryProvider).load();
+  return ref
+      .watch(orderRepositoryProvider)
+      .todaySummary(overdueDays: settings.overdueDays);
+});
+
+final readyOrdersProvider = FutureProvider.autoDispose<List<LaundryOrder>>((
+  ref,
+) async {
+  return ref.watch(orderRepositoryProvider).listReady();
+});
+
+final overdueOrdersProvider = FutureProvider.autoDispose<List<LaundryOrder>>((
+  ref,
+) async {
+  final settings = await ref.watch(settingsRepositoryProvider).load();
+  return ref
+      .watch(orderRepositoryProvider)
+      .listOverdue(days: settings.overdueDays);
+});
+
+/// Dipanggil setiap kali data order berubah (buat, ubah, batal, status,
+/// pembayaran) agar daftar dan beranda ikut segar.
+void invalidateOrderViews(WidgetRef ref) {
+  ref.invalidate(orderListProvider);
+  ref.invalidate(customerOrdersProvider);
+  ref.invalidate(homeSummaryProvider);
+  ref.invalidate(readyOrdersProvider);
+  ref.invalidate(overdueOrdersProvider);
+}

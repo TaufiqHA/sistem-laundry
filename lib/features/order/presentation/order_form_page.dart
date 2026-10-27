@@ -401,13 +401,12 @@ class _OrderFormBodyState extends ConsumerState<OrderFormBody> {
         );
       }
 
-      ref.invalidate(orderListProvider);
-      ref.invalidate(customerOrdersProvider);
+      ref.invalidate(orderDetailProvider(savedId));
+      invalidateOrderViews(ref);
       if (!mounted) {
         return;
       }
       if (_isEdit) {
-        ref.invalidate(orderDetailProvider(savedId));
         context.pop(true);
       } else {
         context.pushReplacement(AppRoutes.orderDetail(savedId));

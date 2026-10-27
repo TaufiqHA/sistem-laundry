@@ -8,6 +8,7 @@ import 'package:sistem_manajemen_laundry/core/utils/phone_number.dart';
 import 'package:sistem_manajemen_laundry/core/utils/qr_token.dart';
 import 'package:sistem_manajemen_laundry/core/utils/rupiah.dart';
 import 'package:sistem_manajemen_laundry/core/utils/tanggal.dart';
+import 'package:sistem_manajemen_laundry/features/order/domain/home_summary.dart';
 import 'package:sistem_manajemen_laundry/features/order/domain/order_models.dart';
 import 'package:sistem_manajemen_laundry/features/order/domain/order_status.dart';
 import 'package:sistem_manajemen_laundry/features/order/domain/scan_result.dart';
@@ -126,6 +127,98 @@ class OrderRepository {
         OrderingTerm.desc(_db.orders.id),
       ]);
     final rows = await builder.get();
+    return rows.map(_mapJoined).toList(growable: false);
+  }
+
+  /// Angka beranda: order hari ini, pemasukan hari ini, piutang baru,
+  /// siap diambil, dan cucian yang lewat batas.
+  Future<HomeSummary> todaySummary({required int overdueDays}) async {
+    final now = DateTime.now();
+    final start = DateTime(now.year, now.month, now.day);
+    final end = start.add(const Duration(days: 1));
+    final cutoff = now.subtract(Duration(days: overdueDays));
+
+    final orderRow = await _db
+        .customSelect(
+          'SELECT COUNT(*) AS jumlah, '
+          'COALESCE(SUM(o.total - COALESCE(('
+          '  SELECT SUM(p.jumlah) FROM payments p '
+          '  WHERE p.order_id = o.id AND p.dihapus_pada IS NULL'
+          '), 0)), 0) AS piutang '
+          'FROM orders o '
+          'WHERE o.tanggal_masuk >= ? AND o.tanggal_masuk < ? '
+          'AND o.dihapus_pada IS NULL',
+          variables: [Variable.withDateTime(start), Variable.withDateTime(end)],
+          readsFrom: {_db.orders, _db.payments},
+        )
+        .getSingle();
+
+    final incomeRow = await _db
+        .customSelect(
+          'SELECT COALESCE(SUM(jumlah), 0) AS pemasukan FROM payments '
+          'WHERE tanggal >= ? AND tanggal < ? AND dihapus_pada IS NULL',
+          variables: [Variable.withDateTime(start), Variable.withDateTime(end)],
+          readsFrom: {_db.payments},
+        )
+        .getSingle();
+
+    final readyRow = await _db
+        .customSelect(
+          'SELECT COUNT(*) AS jumlah FROM orders '
+          'WHERE status = ? AND dihapus_pada IS NULL',
+          variables: [Variable.withInt(OrderStatus.selesai.index)],
+          readsFrom: {_db.orders},
+        )
+        .getSingle();
+
+    final overdueRow = await _db
+        .customSelect(
+          'SELECT COUNT(*) AS jumlah FROM orders '
+          'WHERE status != ? AND tanggal_masuk < ? AND dihapus_pada IS NULL',
+          variables: [
+            Variable.withInt(OrderStatus.diambil.index),
+            Variable.withDateTime(cutoff),
+          ],
+          readsFrom: {_db.orders},
+        )
+        .getSingle();
+
+    return HomeSummary(
+      orderCount: orderRow.read<int>('jumlah'),
+      income: incomeRow.read<int>('pemasukan'),
+      newReceivable: orderRow.read<int>('piutang'),
+      readyCount: readyRow.read<int>('jumlah'),
+      overdueCount: overdueRow.read<int>('jumlah'),
+    );
+  }
+
+  /// Order berstatus Selesai, paling lama menunggu lebih dulu.
+  Future<List<LaundryOrder>> listReady() async {
+    final rows =
+        await (_joinedOrders()
+              ..where(_db.orders.dihapusPada.isNull())
+              ..where(_db.orders.status.equalsValue(OrderStatus.selesai))
+              ..orderBy([
+                OrderingTerm.asc(_db.orders.tanggalMasuk),
+                OrderingTerm.asc(_db.orders.id),
+              ]))
+            .get();
+    return rows.map(_mapJoined).toList(growable: false);
+  }
+
+  /// Order yang belum diambil dan sudah lewat [days] hari.
+  Future<List<LaundryOrder>> listOverdue({required int days}) async {
+    final cutoff = DateTime.now().subtract(Duration(days: days));
+    final rows =
+        await (_joinedOrders()
+              ..where(_db.orders.dihapusPada.isNull())
+              ..where(_db.orders.status.isNotValue(OrderStatus.diambil.index))
+              ..where(_db.orders.tanggalMasuk.isSmallerThanValue(cutoff))
+              ..orderBy([
+                OrderingTerm.asc(_db.orders.tanggalMasuk),
+                OrderingTerm.asc(_db.orders.id),
+              ]))
+            .get();
     return rows.map(_mapJoined).toList(growable: false);
   }
 

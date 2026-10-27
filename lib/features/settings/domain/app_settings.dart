@@ -10,6 +10,7 @@ class AppSettings {
     this.paperWidth = defaultPaperWidth,
     this.printerName = '',
     this.printerAddress = '',
+    this.lastBackupAt,
     this.overdueDays = defaultOverdueDays,
     this.onboardingDone = false,
   });
@@ -31,12 +32,21 @@ class AppSettings {
   final int paperWidth;
   final String printerName;
   final String printerAddress;
+  final DateTime? lastBackupAt;
   final int overdueDays;
   final bool onboardingDone;
 
   bool get hasBusinessName => businessName.trim().isNotEmpty;
 
   bool get hasPrinter => printerAddress.isNotEmpty;
+
+  int? get backupAgeDays {
+    final value = lastBackupAt;
+    if (value == null) {
+      return null;
+    }
+    return DateTime.now().difference(value).inDays;
+  }
 
   String get displayName =>
       hasBusinessName ? businessName.trim() : 'Usaha belum diatur';

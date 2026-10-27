@@ -4,7 +4,7 @@ Aplikasi Android untuk pemilik laundry kecil: catat order, cetak nota dan label 
 
 ## Status
 
-Fase 1–8 selesai: kerangka aplikasi, skema database, pengaturan, layanan, pelanggan, order, pembayaran, status, cetak nota/label, dan pemindai QR dengan fallback nomor nota. Cetak ke printer fisik dan scan label kertas masih menunggu perangkat. Berikutnya beranda dan daftar kerja sesuai [Urutan Pengembangan](Urutan%20Pengembangan.md).
+Fase 1–9 selesai: kerangka aplikasi, data master, order, pembayaran, status, cetak, scan QR, dan beranda dengan ringkasan harian serta daftar kerja. Cetak dan scan label fisik masih menunggu printer. Berikutnya laporan sesuai [Urutan Pengembangan](Urutan%20Pengembangan.md).
 
 ## Menjalankan
 

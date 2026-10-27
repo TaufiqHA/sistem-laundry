@@ -51,6 +51,22 @@ Paket khusus fase lanjut (printer, kamera, PDF, notifikasi) sengaja belum ditamb
 - `permission_handler` dipatok ke 12.x karena versi 13 menuntut `compileSdk 37`, sedangkan proyek memakai 36.
 - Izin Android: `BLUETOOTH_CONNECT`, `BLUETOOTH_SCAN` (Android 12+), dan izin Bluetooth lama untuk Android ≤ 11.
 
+## Pemindaian QR
+
+- Payload label: `LDR1:<nomor_nota>:<token>`. Prefix lain dianggap QR asing dan tidak diproses.
+- Lookup memakai token, bukan nomor nota, karena token acak tidak bisa ditebak. Nomor nota hanya untuk fallback manual.
+- Label yang sama diabaikan selama 3 detik agar satu label tidak memajukan dua tahap.
+- Hasil lookup dibedakan menjadi siap, sudah diambil, dibatalkan, tidak dikenal, dan QR tidak valid.
+- Perubahan status dari scan memakai `advanceStatus` yang sama dengan jalur manual, dengan sumber `scan`.
+- Scan dibuka sebagai layar penuh dari item navigasi, bukan tab, supaya kamera tidak tetap hidup saat pengguna pindah tab.
+
+## Beranda
+
+- Angka hari ini dihitung dari tanggal lokal: jumlah order memakai `tanggal_masuk`, pemasukan memakai tanggal pembayaran, piutang baru dari order hari ini.
+- "Siap diambil" = status Selesai; "menumpuk" = belum Diambil dan `tanggal_masuk` lebih lama dari batas hari di pengaturan.
+- Setiap perubahan order memanggil `invalidateOrderViews` agar daftar, detail, dan beranda ikut segar tanpa perlu buka-tutup aplikasi.
+- Indikator backup memakai `last_backup_at`; nilainya baru diisi pada Fase 11.
+
 ## Database
 
 | Item | Nilai |

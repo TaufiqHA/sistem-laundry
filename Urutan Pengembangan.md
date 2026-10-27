@@ -2,7 +2,7 @@
 
 Dokumen ini berisi urutan pengerjaan, bukan jadwal. Satu fase diselesaikan dan bisa dijalankan di HP sebelum fase berikutnya dimulai, kecuali ditandai boleh paralel. Rujukan `FR-xx` mengacu ke PRD.
 
-**Status:** Fase 1–9 selesai. Fase 0.3, Gerbang 4, dan Gerbang 5 menunggu perangkat. Berikutnya Fase 10.
+**Status:** Fase 1–10 selesai. Fase 0.3, Gerbang 4, dan Gerbang 5 menunggu perangkat. Berikutnya Fase 11.
 
 ## Prinsip urutan
 

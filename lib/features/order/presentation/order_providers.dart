@@ -4,6 +4,7 @@ import 'package:sistem_manajemen_laundry/core/database/database_provider.dart';
 import 'package:sistem_manajemen_laundry/features/order/data/order_repository.dart';
 import 'package:sistem_manajemen_laundry/features/order/domain/home_summary.dart';
 import 'package:sistem_manajemen_laundry/features/order/domain/order_models.dart';
+import 'package:sistem_manajemen_laundry/features/report/presentation/report_providers.dart';
 import 'package:sistem_manajemen_laundry/features/service/domain/laundry_service.dart';
 import 'package:sistem_manajemen_laundry/features/service/presentation/service_providers.dart';
 import 'package:sistem_manajemen_laundry/features/settings/presentation/settings_providers.dart';
@@ -70,4 +71,5 @@ void invalidateOrderViews(WidgetRef ref) {
   ref.invalidate(homeSummaryProvider);
   ref.invalidate(readyOrdersProvider);
   ref.invalidate(overdueOrdersProvider);
+  ref.invalidate(reportProvider);
 }

@@ -5,6 +5,7 @@ import 'package:sistem_manajemen_laundry/features/customer/presentation/customer
 import 'package:sistem_manajemen_laundry/features/order/data/payment_repository.dart';
 import 'package:sistem_manajemen_laundry/features/order/domain/payment.dart';
 import 'package:sistem_manajemen_laundry/features/order/presentation/order_providers.dart';
+import 'package:sistem_manajemen_laundry/features/report/presentation/report_providers.dart';
 
 final paymentRepositoryProvider = Provider<PaymentRepository>((ref) {
   return PaymentRepository(ref.watch(databaseProvider));
@@ -37,5 +38,6 @@ extension PaymentInvalidation on WidgetRef {
     invalidate(homeSummaryProvider);
     invalidate(readyOrdersProvider);
     invalidate(overdueOrdersProvider);
+    invalidate(reportProvider);
   }
 }

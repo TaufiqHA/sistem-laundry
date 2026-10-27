@@ -67,6 +67,14 @@ Paket khusus fase lanjut (printer, kamera, PDF, notifikasi) sengaja belum ditamb
 - Setiap perubahan order memanggil `invalidateOrderViews` agar daftar, detail, dan beranda ikut segar tanpa perlu buka-tutup aplikasi.
 - Indikator backup memakai `last_backup_at`; nilainya baru diisi pada Fase 11.
 
+## Laporan
+
+- **Pemasukan** dihitung dari pembayaran pada periode (uang masuk), bukan total order.
+- **Jumlah order** dihitung dari `tanggal_masuk` pada periode dan mengabaikan order yang dibatalkan.
+- **Layanan terlaris** dikelompokkan dari snapshot `order_items.nama_layanan`, diurutkan berdasarkan omzet; satuan diambil dari layanan asal untuk tampilan.
+- **Laba** = pemasukan − pengeluaran. Pengeluaran belum punya kolom soft delete, jadi penghapusan bersifat permanen dengan konfirmasi.
+- Grafik dan ekspor PDF/Excel (FR-24) tetap ditunda ke P2.
+
 ## Database
 
 | Item | Nilai |

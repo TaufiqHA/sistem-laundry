@@ -37,6 +37,11 @@ String formatJam(DateTime value) {
 String formatTanggalJam(DateTime value) =>
     '${formatTanggal(value)} ${formatJam(value)}';
 
+String formatBulanTahun(DateTime value) {
+  final local = value.toLocal();
+  return '${_bulan[local.month - 1]} ${local.year}';
+}
+
 /// Kunci tanggal untuk penomoran nota, mis. `20261027`.
 String tanggalKey(DateTime value) {
   final local = value.toLocal();

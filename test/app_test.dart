@@ -48,7 +48,7 @@ void main() {
 
     await tester.tap(find.text('Laporan'));
     await tester.pumpAndSettle();
-    expect(find.text('Belum ada laporan'), findsOneWidget);
+    expect(find.text('Layanan terlaris'), findsOneWidget);
 
     await tester.tap(find.text('Beranda'));
     await tester.pumpAndSettle();

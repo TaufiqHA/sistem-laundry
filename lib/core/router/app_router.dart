@@ -4,6 +4,7 @@ import 'package:sistem_manajemen_laundry/core/widgets/app_shell.dart';
 import 'package:sistem_manajemen_laundry/features/customer/presentation/customer_detail_page.dart';
 import 'package:sistem_manajemen_laundry/features/customer/presentation/customers_screen.dart';
 import 'package:sistem_manajemen_laundry/features/home/presentation/home_screen.dart';
+import 'package:sistem_manajemen_laundry/features/order/presentation/debts_page.dart';
 import 'package:sistem_manajemen_laundry/features/order/presentation/order_detail_page.dart';
 import 'package:sistem_manajemen_laundry/features/order/presentation/order_form_page.dart';
 import 'package:sistem_manajemen_laundry/features/order/presentation/orders_screen.dart';
@@ -25,6 +26,7 @@ abstract final class AppRoutes {
   static const services = '/layanan';
   static const scan = '/scan';
   static const orderForm = '/order/baru';
+  static const debts = '/piutang';
 
   static String customerDetail(int id) => '/pelanggan/$id';
 
@@ -112,6 +114,10 @@ GoRouter createRouter({String initialLocation = AppRoutes.home}) {
       GoRoute(
         path: AppRoutes.orderForm,
         builder: (context, state) => const OrderFormPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.debts,
+        builder: (context, state) => const DebtsPage(),
       ),
       GoRoute(
         path: '/order/:id/ubah',

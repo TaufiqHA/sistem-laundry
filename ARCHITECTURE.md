@@ -39,6 +39,7 @@ Paket khusus fase lanjut (printer, kamera, PDF, notifikasi) sengaja belum ditamb
 - **Nomor nota** memakai counter per tanggal lokal (`{tanggal}` = `yyyyMMdd`, `{urut}` = tiga digit) dan dibuat di transaksi yang sama dengan order, sehingga dua order berturut-turut tidak mungkin mendapat nomor sama.
 - **Subtotal item** = `(qtyMilli × hargaSatuan + 500) ~/ 1000`, dibulatkan ke rupiah terdekat di satu tempat.
 - **Telepon pelanggan** disimpan ternormalisasi `62...`; tampilan memakai awalan `0` lewat `PhoneNumber.display`.
+- **Pembayaran** tidak boleh melebihi sisa piutang, tidak boleh nol/negatif, dan tidak boleh dicatat pada order yang dibatalkan. Penghapusan pembayaran bersifat soft delete sehingga piutang otomatis naik kembali.
 
 ## Database
 

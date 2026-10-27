@@ -8,8 +8,11 @@ import 'package:sistem_manajemen_laundry/core/utils/quantity.dart';
 import 'package:sistem_manajemen_laundry/core/utils/rupiah.dart';
 import 'package:sistem_manajemen_laundry/core/utils/tanggal.dart';
 import 'package:sistem_manajemen_laundry/features/order/domain/order_models.dart';
+import 'package:sistem_manajemen_laundry/features/order/domain/payment.dart';
 import 'package:sistem_manajemen_laundry/features/order/presentation/order_providers.dart';
 import 'package:sistem_manajemen_laundry/features/order/presentation/order_widgets.dart';
+import 'package:sistem_manajemen_laundry/features/order/presentation/payment_providers.dart';
+import 'package:sistem_manajemen_laundry/features/order/presentation/payment_sheet.dart';
 
 class OrderDetailPage extends ConsumerWidget {
   const OrderDetailPage({required this.orderId, super.key});
@@ -64,8 +67,13 @@ class OrderDetailPage extends ConsumerWidget {
               Text('Layanan', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               _ItemsCard(items: detail.items),
-              const SizedBox(height: 16),
-              _PaymentCard(detail: detail),
+              const SizedBox(height: 24),
+              Text(
+                'Pembayaran',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              _PaymentSection(detail: detail),
               const SizedBox(height: 24),
               Text(
                 'Riwayat status',
@@ -304,37 +312,158 @@ class _ItemsCard extends StatelessWidget {
   }
 }
 
-class _PaymentCard extends StatelessWidget {
-  const _PaymentCard({required this.detail});
+class _PaymentSection extends ConsumerWidget {
+  const _PaymentSection({required this.detail});
 
   final OrderDetail detail;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            if (detail.order.diskon > 0) ...[
-              _row(theme, 'Diskon', '- ${Rupiah.format(detail.order.diskon)}'),
-              const SizedBox(height: 8),
-            ],
-            _row(theme, 'Total', Rupiah.format(detail.order.total), bold: true),
-            const SizedBox(height: 8),
-            _row(theme, 'Dibayar', Rupiah.format(detail.dibayar)),
-            const SizedBox(height: 8),
-            _row(
-              theme,
-              'Piutang',
-              Rupiah.format(detail.piutang),
-              color: detail.piutang > 0 ? theme.colorScheme.error : null,
+    final payments = ref.watch(paymentsProvider(detail.order.id));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                if (detail.order.diskon > 0) ...[
+                  _row(
+                    theme,
+                    'Diskon',
+                    '- ${Rupiah.format(detail.order.diskon)}',
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                _row(
+                  theme,
+                  'Total',
+                  Rupiah.format(detail.order.total),
+                  bold: true,
+                ),
+                const SizedBox(height: 8),
+                _row(theme, 'Dibayar', Rupiah.format(detail.dibayar)),
+                const SizedBox(height: 8),
+                _row(
+                  theme,
+                  'Piutang',
+                  Rupiah.format(detail.piutang),
+                  color: detail.piutang > 0 ? theme.colorScheme.error : null,
+                ),
+                if (detail.piutang > 0) ...[
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.tonalIcon(
+                      onPressed: () => _addPayment(context, ref),
+                      icon: const Icon(Icons.payments_outlined),
+                      label: const Text('Catat pembayaran'),
+                    ),
+                  ),
+                ],
+              ],
             ),
-          ],
+          ),
         ),
+        const SizedBox(height: 8),
+        payments.when(
+          loading: () =>
+              const Card(child: ListTile(title: Text('Memuat pembayaran...'))),
+          error: (error, stack) => const Card(
+            child: ListTile(title: Text('Gagal memuat pembayaran.')),
+          ),
+          data: (payments) {
+            if (payments.isEmpty) {
+              return const Card(
+                child: ListTile(
+                  leading: Icon(Icons.payments_outlined),
+                  title: Text('Belum ada pembayaran'),
+                  subtitle: Text(
+                    'Pembayaran tunai atau cicilan akan tampil di sini.',
+                  ),
+                ),
+              );
+            }
+            return Card(
+              child: Column(
+                children: [
+                  for (var index = 0; index < payments.length; index++) ...[
+                    if (index > 0) const Divider(height: 1),
+                    _PaymentRow(
+                      payment: payments[index],
+                      onDelete: () =>
+                          _deletePayment(context, ref, payments[index]),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Future<void> _addPayment(BuildContext context, WidgetRef ref) async {
+    final saved = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      builder: (_) => PaymentSheet(order: detail.order, sisa: detail.piutang),
+    );
+    if (saved == true) {
+      ref.invalidatePaymentViews(
+        orderId: detail.order.id,
+        customerId: detail.order.customerId,
+      );
+    }
+  }
+
+  Future<void> _deletePayment(
+    BuildContext context,
+    WidgetRef ref,
+    Payment payment,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Hapus pembayaran?'),
+        content: Text(
+          'Pembayaran ${Rupiah.format(payment.jumlah)} akan dihapus dan '
+          'piutang order ini bertambah kembali.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Batal'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Hapus'),
+          ),
+        ],
       ),
     );
+    if (confirmed != true || !context.mounted) {
+      return;
+    }
+
+    try {
+      await ref.read(paymentRepositoryProvider).softDelete(payment.id);
+      ref.invalidatePaymentViews(
+        orderId: detail.order.id,
+        customerId: detail.order.customerId,
+      );
+    } on PaymentException catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(error.message)));
+      }
+    }
   }
 
   Widget _row(
@@ -353,6 +482,29 @@ class _PaymentCard extends StatelessWidget {
         Text(label, style: style),
         Text(value, style: style?.copyWith(color: color)),
       ],
+    );
+  }
+}
+
+class _PaymentRow extends StatelessWidget {
+  const _PaymentRow({required this.payment, required this.onDelete});
+
+  final Payment payment;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: const Icon(Icons.payments_outlined),
+      title: Text(Rupiah.format(payment.jumlah)),
+      subtitle: Text(
+        '${payment.metode.label} · ${formatTanggalJam(payment.tanggal)}',
+      ),
+      trailing: IconButton(
+        icon: const Icon(Icons.delete_outline),
+        tooltip: 'Hapus pembayaran',
+        onPressed: onDelete,
+      ),
     );
   }
 }

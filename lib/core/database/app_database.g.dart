@@ -2219,7 +2219,8 @@ class OrderItemsCompanion extends UpdateCompanion<OrderItem> {
   }
 }
 
-class $PaymentsTable extends Payments with TableInfo<$PaymentsTable, Payment> {
+class $PaymentsTable extends Payments
+    with TableInfo<$PaymentsTable, PaymentRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -2333,7 +2334,7 @@ class $PaymentsTable extends Payments with TableInfo<$PaymentsTable, Payment> {
   static const String $name = 'payments';
   @override
   VerificationContext validateIntegrity(
-    Insertable<Payment> instance, {
+    Insertable<PaymentRow> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -2392,9 +2393,9 @@ class $PaymentsTable extends Payments with TableInfo<$PaymentsTable, Payment> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Payment map(Map<String, dynamic> data, {String? tablePrefix}) {
+  PaymentRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Payment(
+    return PaymentRow(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}id'],
@@ -2441,7 +2442,7 @@ class $PaymentsTable extends Payments with TableInfo<$PaymentsTable, Payment> {
       const EnumIndexConverter<PaymentMethod>(PaymentMethod.values);
 }
 
-class Payment extends DataClass implements Insertable<Payment> {
+class PaymentRow extends DataClass implements Insertable<PaymentRow> {
   final int id;
   final int orderId;
   final int jumlah;
@@ -2450,7 +2451,7 @@ class Payment extends DataClass implements Insertable<Payment> {
   final String? catatan;
   final DateTime dibuatPada;
   final DateTime? dihapusPada;
-  const Payment({
+  const PaymentRow({
     required this.id,
     required this.orderId,
     required this.jumlah,
@@ -2499,12 +2500,12 @@ class Payment extends DataClass implements Insertable<Payment> {
     );
   }
 
-  factory Payment.fromJson(
+  factory PaymentRow.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Payment(
+    return PaymentRow(
       id: serializer.fromJson<int>(json['id']),
       orderId: serializer.fromJson<int>(json['orderId']),
       jumlah: serializer.fromJson<int>(json['jumlah']),
@@ -2534,7 +2535,7 @@ class Payment extends DataClass implements Insertable<Payment> {
     };
   }
 
-  Payment copyWith({
+  PaymentRow copyWith({
     int? id,
     int? orderId,
     int? jumlah,
@@ -2543,7 +2544,7 @@ class Payment extends DataClass implements Insertable<Payment> {
     Value<String?> catatan = const Value.absent(),
     DateTime? dibuatPada,
     Value<DateTime?> dihapusPada = const Value.absent(),
-  }) => Payment(
+  }) => PaymentRow(
     id: id ?? this.id,
     orderId: orderId ?? this.orderId,
     jumlah: jumlah ?? this.jumlah,
@@ -2553,8 +2554,8 @@ class Payment extends DataClass implements Insertable<Payment> {
     dibuatPada: dibuatPada ?? this.dibuatPada,
     dihapusPada: dihapusPada.present ? dihapusPada.value : this.dihapusPada,
   );
-  Payment copyWithCompanion(PaymentsCompanion data) {
-    return Payment(
+  PaymentRow copyWithCompanion(PaymentsCompanion data) {
+    return PaymentRow(
       id: data.id.present ? data.id.value : this.id,
       orderId: data.orderId.present ? data.orderId.value : this.orderId,
       jumlah: data.jumlah.present ? data.jumlah.value : this.jumlah,
@@ -2572,7 +2573,7 @@ class Payment extends DataClass implements Insertable<Payment> {
 
   @override
   String toString() {
-    return (StringBuffer('Payment(')
+    return (StringBuffer('PaymentRow(')
           ..write('id: $id, ')
           ..write('orderId: $orderId, ')
           ..write('jumlah: $jumlah, ')
@@ -2599,7 +2600,7 @@ class Payment extends DataClass implements Insertable<Payment> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Payment &&
+      (other is PaymentRow &&
           other.id == this.id &&
           other.orderId == this.orderId &&
           other.jumlah == this.jumlah &&
@@ -2610,7 +2611,7 @@ class Payment extends DataClass implements Insertable<Payment> {
           other.dihapusPada == this.dihapusPada);
 }
 
-class PaymentsCompanion extends UpdateCompanion<Payment> {
+class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
   final Value<int> id;
   final Value<int> orderId;
   final Value<int> jumlah;
@@ -2642,7 +2643,7 @@ class PaymentsCompanion extends UpdateCompanion<Payment> {
        jumlah = Value(jumlah),
        metode = Value(metode),
        tanggal = Value(tanggal);
-  static Insertable<Payment> custom({
+  static Insertable<PaymentRow> custom({
     Expression<int>? id,
     Expression<int>? orderId,
     Expression<int>? jumlah,
@@ -5192,9 +5193,8 @@ final class $$OrdersTableReferences
     );
   }
 
-  static MultiTypedResultKey<$PaymentsTable, List<Payment>> _paymentsRefsTable(
-    _$AppDatabase db,
-  ) => MultiTypedResultKey.fromTable(
+  static MultiTypedResultKey<$PaymentsTable, List<PaymentRow>>
+  _paymentsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.payments,
     aliasName: 'orders__id__payments__order_id',
   );
@@ -5819,7 +5819,7 @@ class $$OrdersTableTableManager
                         await $_getPrefetchedDataByColumns<
                           Order,
                           $OrdersTable,
-                          Payment,
+                          PaymentRow,
                           $PaymentsTable
                         >(
                           currentTable: table,
@@ -6358,7 +6358,7 @@ typedef $$PaymentsTableUpdateCompanionBuilder = PaymentsCompanion Function({
 });
 
 final class $$PaymentsTableReferences
-    extends BaseReferences<_$AppDatabase, $PaymentsTable, Payment> {
+    extends BaseReferences<_$AppDatabase, $PaymentsTable, PaymentRow> {
   $$PaymentsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $OrdersTable _orderIdTable(_$AppDatabase db) =>
@@ -6579,14 +6579,14 @@ class $$PaymentsTableTableManager
         RootTableManager<
           _$AppDatabase,
           $PaymentsTable,
-          Payment,
+          PaymentRow,
           $$PaymentsTableFilterComposer,
           $$PaymentsTableOrderingComposer,
           $$PaymentsTableAnnotationComposer,
           $$PaymentsTableCreateCompanionBuilder,
           $$PaymentsTableUpdateCompanionBuilder,
-          (Payment, $$PaymentsTableReferences),
-          Payment,
+          (PaymentRow, $$PaymentsTableReferences),
+          PaymentRow,
           PrefetchHooks Function({bool orderId})
         > {
   $$PaymentsTableTableManager(_$AppDatabase db, $PaymentsTable table)
@@ -6643,7 +6643,7 @@ class $$PaymentsTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable<$PaymentsTable, Payment>(table),
+                  e.readTable<$PaymentsTable, PaymentRow>(table),
                   $$PaymentsTableReferences(db, table, e),
                 ),
               )
@@ -6695,14 +6695,14 @@ typedef $$PaymentsTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
       $PaymentsTable,
-      Payment,
+      PaymentRow,
       $$PaymentsTableFilterComposer,
       $$PaymentsTableOrderingComposer,
       $$PaymentsTableAnnotationComposer,
       $$PaymentsTableCreateCompanionBuilder,
       $$PaymentsTableUpdateCompanionBuilder,
-      (Payment, $$PaymentsTableReferences),
-      Payment,
+      (PaymentRow, $$PaymentsTableReferences),
+      PaymentRow,
       PrefetchHooks Function({bool orderId})
     >;
 typedef $$OrderStatusHistoryTableCreateCompanionBuilder =

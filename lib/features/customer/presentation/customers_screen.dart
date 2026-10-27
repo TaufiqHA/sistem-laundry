@@ -51,7 +51,16 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
     final customers = ref.watch(customerSearchProvider(_query));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Pelanggan')),
+      appBar: AppBar(
+        title: const Text('Pelanggan'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.account_balance_wallet_outlined),
+            tooltip: 'Piutang',
+            onPressed: () => context.push(AppRoutes.debts),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'customer-add-fab',
         onPressed: () => _openForm(context, ref, null),

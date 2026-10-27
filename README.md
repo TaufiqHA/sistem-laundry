@@ -4,7 +4,7 @@ Aplikasi Android untuk pemilik laundry kecil: catat order, cetak nota dan label 
 
 ## Status
 
-Fase 1–5 selesai: kerangka aplikasi, skema database, pengaturan usaha, layanan, pelanggan, serta order dan nota (nomor otomatis, total, ubah, batal, riwayat status). Berikutnya pembayaran dan piutang sesuai [Urutan Pengembangan](Urutan%20Pengembangan.md).
+Fase 1–6 selesai: kerangka aplikasi, skema database, pengaturan, layanan, pelanggan, order dan nota, serta pembayaran, cicilan, dan daftar piutang. Berikutnya status cucian, cetak nota, dan label QR sesuai [Urutan Pengembangan](Urutan%20Pengembangan.md).
 
 ## Menjalankan
 

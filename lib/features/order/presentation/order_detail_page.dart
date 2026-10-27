@@ -9,10 +9,12 @@ import 'package:sistem_manajemen_laundry/core/utils/rupiah.dart';
 import 'package:sistem_manajemen_laundry/core/utils/tanggal.dart';
 import 'package:sistem_manajemen_laundry/features/order/domain/order_models.dart';
 import 'package:sistem_manajemen_laundry/features/order/domain/payment.dart';
+import 'package:sistem_manajemen_laundry/features/order/domain/status_change_source.dart';
 import 'package:sistem_manajemen_laundry/features/order/presentation/order_providers.dart';
 import 'package:sistem_manajemen_laundry/features/order/presentation/order_widgets.dart';
 import 'package:sistem_manajemen_laundry/features/order/presentation/payment_providers.dart';
 import 'package:sistem_manajemen_laundry/features/order/presentation/payment_sheet.dart';
+import 'package:sistem_manajemen_laundry/features/printer/presentation/print_actions.dart';
 
 class OrderDetailPage extends ConsumerWidget {
   const OrderDetailPage({required this.orderId, super.key});
@@ -30,17 +32,8 @@ class OrderDetailPage extends ConsumerWidget {
         actions: [
           if (current != null)
             PopupMenuButton<String>(
-              onSelected: (value) {
-                if (value == 'edit') {
-                  _edit(context, ref);
-                } else {
-                  _cancel(context, ref, current);
-                }
-              },
-              itemBuilder: (context) => const [
-                PopupMenuItem(value: 'edit', child: Text('Ubah order')),
-                PopupMenuItem(value: 'cancel', child: Text('Batalkan order')),
-              ],
+              onSelected: (value) => _onMenu(context, ref, current, value),
+              itemBuilder: (context) => _menuItems(current),
             ),
         ],
       ),
@@ -52,10 +45,16 @@ class OrderDetailPage extends ConsumerWidget {
           if (detail == null) {
             return const Center(child: Text('Order tidak ditemukan.'));
           }
+          final next = detail.order.status.next;
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
             children: [
-              _HeaderCard(order: detail.order),
+              _HeaderCard(
+                order: detail.order,
+                onAdvance: next == null
+                    ? null
+                    : () => _advance(context, ref, detail),
+              ),
               const SizedBox(height: 16),
               _CustomerCard(
                 order: detail.order,
@@ -88,13 +87,189 @@ class OrderDetailPage extends ConsumerWidget {
     );
   }
 
+  List<PopupMenuEntry<String>> _menuItems(OrderDetail detail) {
+    final next = detail.order.status.next;
+    final last = detail.history.isEmpty ? null : detail.history.last;
+    final canUndo =
+        last != null &&
+        last.statusLama != null &&
+        last.sumber != StatusChangeSource.urungkan;
+
+    return [
+      if (next != null)
+        PopupMenuItem(value: 'advance', child: Text('Ubah ke ${next.label}')),
+      if (canUndo)
+        const PopupMenuItem(
+          value: 'undo',
+          child: Text('Urungkan status terakhir'),
+        ),
+      const PopupMenuDivider(),
+      const PopupMenuItem(value: 'receipt', child: Text('Cetak nota')),
+      const PopupMenuItem(value: 'label', child: Text('Cetak label')),
+      const PopupMenuItem(value: 'both', child: Text('Cetak nota dan label')),
+      const PopupMenuDivider(),
+      const PopupMenuItem(value: 'edit', child: Text('Ubah order')),
+      const PopupMenuItem(value: 'cancel', child: Text('Batalkan order')),
+    ];
+  }
+
+  Future<void> _onMenu(
+    BuildContext context,
+    WidgetRef ref,
+    OrderDetail detail,
+    String value,
+  ) {
+    return switch (value) {
+      'advance' => _advance(context, ref, detail),
+      'undo' => _undo(context, ref, detail),
+      'receipt' => PrintActions.run(
+        context,
+        ref,
+        detail: detail,
+        target: PrintTarget.receipt,
+      ),
+      'label' => PrintActions.run(
+        context,
+        ref,
+        detail: detail,
+        target: PrintTarget.label,
+      ),
+      'both' => PrintActions.run(
+        context,
+        ref,
+        detail: detail,
+        target: PrintTarget.both,
+      ),
+      'edit' => _edit(context, ref),
+      'cancel' => _cancel(context, ref, detail),
+      _ => Future<void>.value(),
+    };
+  }
+
+  Future<void> _advance(
+    BuildContext context,
+    WidgetRef ref,
+    OrderDetail detail,
+  ) async {
+    final current = detail.order.status;
+    final next = current.next;
+    if (next == null) {
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Ubah status?'),
+        content: Text('${current.label} → ${next.label}'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Batal'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Ubah'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) {
+      return;
+    }
+
+    try {
+      await ref.read(orderRepositoryProvider).advanceStatus(orderId);
+      _invalidate(ref);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Status menjadi ${next.label}.'),
+            action: SnackBarAction(
+              label: 'Urungkan',
+              onPressed: () async {
+                try {
+                  await ref
+                      .read(orderRepositoryProvider)
+                      .undoLastStatus(orderId);
+                  _invalidate(ref);
+                } on OrderException {
+                  // Perubahan sudah tidak bisa diurungkan; biarkan apa adanya.
+                }
+              },
+            ),
+          ),
+        );
+      }
+    } on OrderException catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(error.message)));
+      }
+    }
+  }
+
+  Future<void> _undo(
+    BuildContext context,
+    WidgetRef ref,
+    OrderDetail detail,
+  ) async {
+    final last = detail.history.isEmpty ? null : detail.history.last;
+    final previous = last?.statusLama;
+    if (previous == null) {
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Urungkan status terakhir?'),
+        content: Text('${detail.order.status.label} → ${previous.label}'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Batal'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Urungkan'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) {
+      return;
+    }
+
+    try {
+      final result = await ref
+          .read(orderRepositoryProvider)
+          .undoLastStatus(orderId);
+      _invalidate(ref);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Status dikembalikan ke ${result.label}.')),
+        );
+      }
+    } on OrderException catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(error.message)));
+      }
+    }
+  }
+
   Future<void> _edit(BuildContext context, WidgetRef ref) async {
     final changed = await context.push<bool>(AppRoutes.orderEdit(orderId));
     if (changed ?? false) {
-      ref.invalidate(orderDetailProvider(orderId));
-      ref.invalidate(orderListProvider);
-      ref.invalidate(customerOrdersProvider);
+      _invalidate(ref);
     }
+  }
+
+  void _invalidate(WidgetRef ref) {
+    ref.invalidate(orderDetailProvider(orderId));
+    ref.invalidate(orderListProvider);
+    ref.invalidate(customerOrdersProvider);
   }
 
   Future<void> _cancel(
@@ -154,9 +329,10 @@ class OrderDetailPage extends ConsumerWidget {
 }
 
 class _HeaderCard extends StatelessWidget {
-  const _HeaderCard({required this.order});
+  const _HeaderCard({required this.order, this.onAdvance});
 
   final LaundryOrder order;
+  final VoidCallback? onAdvance;
 
   @override
   Widget build(BuildContext context) {
@@ -199,6 +375,17 @@ class _HeaderCard extends StatelessWidget {
                 label: 'Catatan',
                 value: order.catatan!,
               ),
+            if (onAdvance != null) ...[
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: onAdvance,
+                  icon: const Icon(Icons.arrow_forward),
+                  label: Text('Ubah ke ${order.status.next?.label ?? ''}'),
+                ),
+              ),
+            ],
           ],
         ),
       ),

@@ -40,6 +40,16 @@ Paket khusus fase lanjut (printer, kamera, PDF, notifikasi) sengaja belum ditamb
 - **Subtotal item** = `(qtyMilli × hargaSatuan + 500) ~/ 1000`, dibulatkan ke rupiah terdekat di satu tempat.
 - **Telepon pelanggan** disimpan ternormalisasi `62...`; tampilan memakai awalan `0` lewat `PhoneNumber.display`.
 - **Pembayaran** tidak boleh melebihi sisa piutang, tidak boleh nol/negatif, dan tidak boleh dicatat pada order yang dibatalkan. Penghapusan pembayaran bersifat soft delete sehingga piutang otomatis naik kembali.
+- **Status** hanya maju satu tahap lewat `advanceStatus`; urungkan menulis baris riwayat baru dengan sumber `urungkan`, bukan menghapus riwayat.
+- **QR label** berisi `LDR1:<nomor_nota>:<token>`; token tidak berubah saat cetak ulang.
+
+## Cetak
+
+- `EscPosBuilder` menyusun byte ESC/POS tanpa menyentuh Bluetooth, sehingga template bisa diuji tanpa printer. `PrinterService` hanya mengirim byte.
+- Nota memuat identitas usaha, item, total, dibayar, dan sisa; label kantong **tidak memuat harga**.
+- QR label memakai error correction M, ukuran modul mengikuti `58x40` atau `58x30`.
+- `permission_handler` dipatok ke 12.x karena versi 13 menuntut `compileSdk 37`, sedangkan proyek memakai 36.
+- Izin Android: `BLUETOOTH_CONNECT`, `BLUETOOTH_SCAN` (Android 12+), dan izin Bluetooth lama untuk Android ≤ 11.
 
 ## Database
 
@@ -106,3 +116,4 @@ Di dalam fitur, folder mengikuti kebutuhan: `presentation/`, `domain/`, `data/`.
 | Harga jual dan saluran penjualan | Riset pasar | Fase 13, bukan kode inti |
 | Status per kantong | Hasil uji 2-3 laundry | Skema `order_bags` |
 | Nama usaha resmi untuk branding | Pemilik | `applicationId` sebelum rilis |
+| Pembayaran langsung di form order baru | Uji MVP | Alur PRD 6.8 langkah 5; sementara pembayaran dicatat dari detail order |

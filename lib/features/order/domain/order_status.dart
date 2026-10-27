@@ -15,6 +15,8 @@ enum OrderStatus {
 
   bool get isFinal => this == OrderStatus.diambil;
 
+  bool get canAdvance => next != null;
+
   OrderStatus? get next {
     final index = this.index + 1;
     return index < OrderStatus.values.length ? OrderStatus.values[index] : null;

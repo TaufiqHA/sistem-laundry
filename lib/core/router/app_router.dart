@@ -8,6 +8,7 @@ import 'package:sistem_manajemen_laundry/features/order/presentation/debts_page.
 import 'package:sistem_manajemen_laundry/features/order/presentation/order_detail_page.dart';
 import 'package:sistem_manajemen_laundry/features/order/presentation/order_form_page.dart';
 import 'package:sistem_manajemen_laundry/features/order/presentation/orders_screen.dart';
+import 'package:sistem_manajemen_laundry/features/printer/presentation/printer_settings_page.dart';
 import 'package:sistem_manajemen_laundry/features/report/presentation/reports_screen.dart';
 import 'package:sistem_manajemen_laundry/features/scan/presentation/scan_screen.dart';
 import 'package:sistem_manajemen_laundry/features/service/presentation/services_screen.dart';
@@ -23,6 +24,7 @@ abstract final class AppRoutes {
   static const reports = '/laporan';
   static const settings = '/pengaturan';
   static const businessProfile = '/pengaturan/profil';
+  static const printerSettings = '/pengaturan/printer';
   static const services = '/layanan';
   static const scan = '/scan';
   static const orderForm = '/order/baru';
@@ -99,6 +101,10 @@ GoRouter createRouter({String initialLocation = AppRoutes.home}) {
       GoRoute(
         path: AppRoutes.businessProfile,
         builder: (context, state) => const BusinessProfilePage(),
+      ),
+      GoRoute(
+        path: AppRoutes.printerSettings,
+        builder: (context, state) => const PrinterSettingsPage(),
       ),
       GoRoute(
         path: AppRoutes.services,

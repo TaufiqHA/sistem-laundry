@@ -10,6 +10,9 @@ abstract final class SettingKeys {
   static const receiptFooter = 'nota_footer';
   static const notaFormat = 'nota_format';
   static const labelSize = 'label_ukuran';
+  static const paperWidth = 'kertas_lebar_mm';
+  static const printerName = 'printer_nama';
+  static const printerAddress = 'printer_alamat';
   static const overdueDays = 'batas_hari_belum_diambil';
   static const lastBackupAt = 'backup_terakhir';
   static const onboardingDone = 'onboarding_selesai';
@@ -66,6 +69,11 @@ class SettingsRepository {
       notaFormat:
           values[SettingKeys.notaFormat] ?? AppSettings.defaultNotaFormat,
       labelSize: values[SettingKeys.labelSize] ?? AppSettings.defaultLabelSize,
+      paperWidth:
+          int.tryParse(values[SettingKeys.paperWidth] ?? '') ??
+          AppSettings.defaultPaperWidth,
+      printerName: values[SettingKeys.printerName] ?? '',
+      printerAddress: values[SettingKeys.printerAddress] ?? '',
       overdueDays:
           int.tryParse(values[SettingKeys.overdueDays] ?? '') ??
           AppSettings.defaultOverdueDays,
@@ -91,6 +99,29 @@ class SettingsRepository {
 
   Future<void> setLabelSize(String size) {
     return set(SettingKeys.labelSize, size);
+  }
+
+  Future<void> setPaperWidth(int millimeters) {
+    return setInt(SettingKeys.paperWidth, millimeters);
+  }
+
+  Future<void> setPrinter({
+    required String name,
+    required String address,
+  }) async {
+    await set(SettingKeys.printerName, name);
+    await set(SettingKeys.printerAddress, address);
+  }
+
+  Future<({String name, String address})?> printer() async {
+    final address = await get(SettingKeys.printerAddress);
+    if (address == null || address.isEmpty) {
+      return null;
+    }
+    return (
+      name: await get(SettingKeys.printerName) ?? 'Printer',
+      address: address,
+    );
   }
 
   Future<void> setOverdueDays(int days) {

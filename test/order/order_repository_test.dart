@@ -9,6 +9,7 @@ import 'package:sistem_manajemen_laundry/features/order/data/order_repository.da
 import 'package:sistem_manajemen_laundry/features/order/domain/order_models.dart';
 import 'package:sistem_manajemen_laundry/features/order/domain/order_status.dart';
 import 'package:sistem_manajemen_laundry/features/order/domain/payment_method.dart';
+import 'package:sistem_manajemen_laundry/features/order/domain/status_change_source.dart';
 import 'package:sistem_manajemen_laundry/features/service/data/service_repository.dart';
 import 'package:sistem_manajemen_laundry/features/service/domain/service_unit.dart';
 import 'package:sistem_manajemen_laundry/features/settings/data/settings_repository.dart';
@@ -227,6 +228,77 @@ void main() {
     final orders = await repository.listByCustomer(customerId);
 
     expect(orders.map((order) => order.id), [second, first]);
+  });
+
+  test('memajukan status menulis riwayat manual', () async {
+    final id = await createOrder();
+
+    final next = await repository.advanceStatus(id);
+
+    expect(next, OrderStatus.diproses);
+    final detail = await repository.getDetail(id);
+    expect(detail!.order.status, OrderStatus.diproses);
+    expect(detail.history, hasLength(2));
+    expect(detail.history.last.sumber, StatusChangeSource.manual);
+    expect(detail.history.last.statusLama, OrderStatus.diterima);
+  });
+
+  test('status Diambil tidak bisa dimajukan lagi', () async {
+    final id = await createOrder();
+    for (var step = 0; step < 3; step++) {
+      await repository.advanceStatus(id);
+    }
+
+    final detail = await repository.getDetail(id);
+    expect(detail!.order.status, OrderStatus.diambil);
+    await expectLater(
+      repository.advanceStatus(id),
+      throwsA(isA<OrderException>()),
+    );
+  });
+
+  test('order batal tidak bisa dimajukan', () async {
+    final id = await createOrder();
+    await repository.cancel(id);
+
+    await expectLater(
+      repository.advanceStatus(id),
+      throwsA(isA<OrderException>()),
+    );
+  });
+
+  test('urungkan mengembalikan status dan menulis riwayat', () async {
+    final id = await createOrder();
+    await repository.advanceStatus(id);
+
+    final previous = await repository.undoLastStatus(id);
+
+    expect(previous, OrderStatus.diterima);
+    final detail = await repository.getDetail(id);
+    expect(detail!.order.status, OrderStatus.diterima);
+    expect(detail.history, hasLength(3));
+    expect(detail.history.last.sumber, StatusChangeSource.urungkan);
+    expect(detail.history.last.statusBaru, OrderStatus.diterima);
+  });
+
+  test('urungkan tanpa perubahan ditolak', () async {
+    final id = await createOrder();
+
+    await expectLater(
+      repository.undoLastStatus(id),
+      throwsA(isA<OrderException>()),
+    );
+  });
+
+  test('urungkan dua kali berturut-turut ditolak', () async {
+    final id = await createOrder();
+    await repository.advanceStatus(id);
+    await repository.undoLastStatus(id);
+
+    await expectLater(
+      repository.undoLastStatus(id),
+      throwsA(isA<OrderException>()),
+    );
   });
 }
 

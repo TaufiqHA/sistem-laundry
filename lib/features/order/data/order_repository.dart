@@ -250,6 +250,94 @@ class OrderRepository {
     });
   }
 
+  /// Memajukan status tepat satu tahap dan menulis riwayat.
+  Future<OrderStatus> advanceStatus(
+    int id, {
+    StatusChangeSource source = StatusChangeSource.manual,
+  }) {
+    return _db.transaction(() async {
+      final order = await (_db.select(
+        _db.orders,
+      )..where((table) => table.id.equals(id))).getSingleOrNull();
+      if (order == null || order.dihapusPada != null) {
+        throw OrderException('Order tidak ditemukan atau sudah dibatalkan.');
+      }
+
+      final next = order.status.next;
+      if (next == null) {
+        throw OrderException('Status sudah Diambil dan tidak bisa dimajukan.');
+      }
+
+      final now = nowUtc();
+      await (_db.update(_db.orders)..where((table) => table.id.equals(id)))
+          .write(OrdersCompanion(status: Value(next), diubahPada: Value(now)));
+      await _db
+          .into(_db.orderStatusHistory)
+          .insert(
+            OrderStatusHistoryCompanion.insert(
+              orderId: id,
+              statusLama: Value(order.status),
+              statusBaru: next,
+              sumber: source,
+              diubahPada: Value(now),
+            ),
+          );
+      return next;
+    });
+  }
+
+  /// Mengembalikan status ke tahap sebelumnya. Hanya berlaku untuk satu
+  /// perubahan terakhir dan menulis baris riwayat baru.
+  Future<OrderStatus> undoLastStatus(int id) {
+    return _db.transaction(() async {
+      final order = await (_db.select(
+        _db.orders,
+      )..where((table) => table.id.equals(id))).getSingleOrNull();
+      if (order == null || order.dihapusPada != null) {
+        throw OrderException('Order tidak ditemukan atau sudah dibatalkan.');
+      }
+
+      final last =
+          await (_db.select(_db.orderStatusHistory)
+                ..where((table) => table.orderId.equals(id))
+                ..orderBy([(table) => OrderingTerm.desc(table.id)])
+                ..limit(1))
+              .getSingleOrNull();
+
+      if (last == null || last.statusLama == null) {
+        throw OrderException('Belum ada perubahan status untuk diurungkan.');
+      }
+      if (last.sumber == StatusChangeSource.urungkan) {
+        throw OrderException('Perubahan terakhir sudah diurungkan.');
+      }
+      if (last.statusBaru != order.status) {
+        throw OrderException(
+          'Status sudah berubah. Muat ulang halaman lalu coba lagi.',
+        );
+      }
+
+      final previous = last.statusLama!;
+      final now = nowUtc();
+      await (_db.update(
+        _db.orders,
+      )..where((table) => table.id.equals(id))).write(
+        OrdersCompanion(status: Value(previous), diubahPada: Value(now)),
+      );
+      await _db
+          .into(_db.orderStatusHistory)
+          .insert(
+            OrderStatusHistoryCompanion.insert(
+              orderId: id,
+              statusLama: Value(order.status),
+              statusBaru: previous,
+              sumber: StatusChangeSource.urungkan,
+              diubahPada: Value(now),
+            ),
+          );
+      return previous;
+    });
+  }
+
   JoinedSelectStatement<HasResultSet, dynamic> _joinedOrders() {
     return _db.select(_db.orders).join([
       innerJoin(

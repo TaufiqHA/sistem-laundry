@@ -2,6 +2,9 @@ import 'package:sistem_manajemen_laundry/features/order/domain/order_status.dart
 import 'package:sistem_manajemen_laundry/features/order/domain/status_change_source.dart';
 import 'package:sistem_manajemen_laundry/features/service/domain/service_unit.dart';
 
+String qrPayloadFor(LaundryOrder order) =>
+    'LDR1:${order.nomorNota}:${order.qrToken}';
+
 class LaundryOrder {
   const LaundryOrder({
     required this.id,

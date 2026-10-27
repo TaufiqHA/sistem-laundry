@@ -97,4 +97,26 @@ void main() {
     expect(await repository.isOnboardingDone(), isTrue);
     expect((await repository.load()).onboardingDone, isTrue);
   });
+
+  test('menyimpan printer dan lebar kertas', () async {
+    await repository.setPrinter(name: 'RPP02N', address: 'AA:BB:CC:DD:EE:FF');
+    await repository.setPaperWidth(80);
+
+    final settings = await repository.load();
+    expect(settings.printerName, 'RPP02N');
+    expect(settings.printerAddress, 'AA:BB:CC:DD:EE:FF');
+    expect(settings.hasPrinter, isTrue);
+    expect(settings.paperWidth, 80);
+
+    final saved = await repository.printer();
+    expect(saved?.name, 'RPP02N');
+    expect(saved?.address, 'AA:BB:CC:DD:EE:FF');
+  });
+
+  test('lebar kertas bawaan 58 mm', () async {
+    final settings = await repository.load();
+    expect(settings.paperWidth, 58);
+    expect(settings.hasPrinter, isFalse);
+    expect(await repository.printer(), isNull);
+  });
 }

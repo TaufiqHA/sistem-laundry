@@ -74,6 +74,16 @@ class SettingsScreen extends ConsumerWidget {
                 const Divider(height: 1),
                 ListTile(
                   leading: const Icon(Icons.print_outlined),
+                  title: const Text('Printer'),
+                  subtitle: Text(
+                    settings.hasPrinter ? settings.printerName : 'Belum diatur',
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push(AppRoutes.printerSettings),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.print_outlined),
                   title: const Text('Ukuran label'),
                   subtitle: Text(
                     AppSettings.labelSizes[settings.labelSize] ??

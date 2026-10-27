@@ -7,6 +7,9 @@ class AppSettings {
     this.receiptFooter = '',
     this.notaFormat = defaultNotaFormat,
     this.labelSize = defaultLabelSize,
+    this.paperWidth = defaultPaperWidth,
+    this.printerName = '',
+    this.printerAddress = '',
     this.overdueDays = defaultOverdueDays,
     this.onboardingDone = false,
   });
@@ -14,8 +17,10 @@ class AppSettings {
   static const defaultNotaFormat = 'LDR-{tanggal}-{urut}';
   static const defaultLabelSize = '58x40';
   static const defaultOverdueDays = 7;
+  static const defaultPaperWidth = 58;
 
   static const labelSizes = {'58x40': '58 × 40 mm', '58x30': '58 × 30 mm'};
+  static const paperWidths = {58: '58 mm', 80: '80 mm'};
 
   final String businessName;
   final String businessPhone;
@@ -23,10 +28,15 @@ class AppSettings {
   final String receiptFooter;
   final String notaFormat;
   final String labelSize;
+  final int paperWidth;
+  final String printerName;
+  final String printerAddress;
   final int overdueDays;
   final bool onboardingDone;
 
   bool get hasBusinessName => businessName.trim().isNotEmpty;
+
+  bool get hasPrinter => printerAddress.isNotEmpty;
 
   String get displayName =>
       hasBusinessName ? businessName.trim() : 'Usaha belum diatur';

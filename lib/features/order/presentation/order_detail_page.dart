@@ -26,6 +26,27 @@ class OrderDetailPage extends ConsumerWidget {
     final detail = ref.watch(orderDetailProvider(orderId));
     final current = detail.value;
 
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          return;
+        }
+        // Snackbar yang masih tampil saat halaman ditutup bisa terbawa ke
+        // Scaffold lain dan memicu GlobalKey ganda. Bersihkan dulu.
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        Navigator.of(context).pop();
+      },
+      child: _buildScaffold(context, ref, detail, current),
+    );
+  }
+
+  Widget _buildScaffold(
+    BuildContext context,
+    WidgetRef ref,
+    AsyncValue<OrderDetail?> detail,
+    OrderDetail? current,
+  ) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Detail order'),

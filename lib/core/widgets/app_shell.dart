@@ -54,6 +54,7 @@ class AppShell extends StatelessWidget {
   int _destinationIndex(int branch) => branch >= 3 ? 4 : branch;
 
   void _onDestinationSelected(BuildContext context, int index) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
     if (index == 3) {
       context.push(AppRoutes.scan);
       return;

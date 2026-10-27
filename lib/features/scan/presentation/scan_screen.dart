@@ -1,13 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'package:sistem_manajemen_laundry/core/l10n/app_strings.dart';
+import 'package:sistem_manajemen_laundry/features/order/domain/order_models.dart';
 import 'package:sistem_manajemen_laundry/features/order/domain/scan_result.dart';
 import 'package:sistem_manajemen_laundry/features/order/presentation/order_providers.dart';
 import 'package:sistem_manajemen_laundry/features/scan/domain/qr_payload.dart';
-import 'package:sistem_manajemen_laundry/features/scan/presentation/scan_result_sheet.dart';
+import 'package:sistem_manajemen_laundry/features/scan/presentation/scan_result_panel.dart';
 
 class ScanScreen extends ConsumerStatefulWidget {
   const ScanScreen({super.key});
@@ -28,6 +31,10 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
   bool _torchOn = false;
   String? _lastCode;
   DateTime _lastHandled = DateTime.fromMillisecondsSinceEpoch(0);
+  ({int orderId, String nota, String nextLabel})? _lastChange;
+  Timer? _bannerTimer;
+  String? _error;
+  ScanResult? _result;
 
   @override
   void initState() {
@@ -37,6 +44,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
 
   @override
   void dispose() {
+    _bannerTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
@@ -49,7 +57,10 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
   }
 
   Future<void> _onDetect(BarcodeCapture capture) async {
-    if (_busy || _permissionDenied || capture.barcodes.isEmpty) {
+    if (_busy ||
+        _permissionDenied ||
+        _result != null ||
+        capture.barcodes.isEmpty) {
       return;
     }
     final code = capture.barcodes.first.rawValue;
@@ -87,16 +98,10 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     if (!mounted) {
       return;
     }
-    setState(() => _busy = true);
-    final advance = await showScanResult(context, result);
-    if (!mounted) {
-      return;
-    }
-    setState(() => _busy = false);
-
-    if (advance && result.detail != null) {
-      await _advance(result);
-    }
+    setState(() {
+      _busy = false;
+      _result = result;
+    });
   }
 
   Future<void> _advance(ScanResult result) async {
@@ -116,66 +121,64 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${detail.order.nomorNota} → ${next.label}'),
-          action: SnackBarAction(
-            label: 'Urungkan',
-            onPressed: () async {
-              try {
-                await ref
-                    .read(orderRepositoryProvider)
-                    .undoLastStatus(detail.order.id);
-                ref.invalidate(orderDetailProvider(detail.order.id));
-                ref.invalidate(orderListProvider);
-                ref.invalidate(customerOrdersProvider);
-                ref.invalidate(homeSummaryProvider);
-                ref.invalidate(readyOrdersProvider);
-                ref.invalidate(overdueOrdersProvider);
-              } on Exception {
-                // Perubahan sudah tidak bisa diurungkan.
-              }
-            },
-          ),
-        ),
-      );
+      setState(() {
+        _error = null;
+        _result = null;
+        _lastChange = (
+          orderId: detail.order.id,
+          nota: detail.order.nomorNota,
+          nextLabel: next.label,
+        );
+      });
+      _bannerTimer?.cancel();
+      _bannerTimer = Timer(const Duration(seconds: 8), () {
+        if (mounted) {
+          setState(() => _lastChange = null);
+        }
+      });
     } on Exception {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Gagal mengubah status. Coba lagi.')),
-        );
+        setState(() {
+          _result = null;
+          _error = 'Gagal mengubah status. Coba lagi.';
+        });
       }
     } finally {
       _lastHandled = DateTime.now();
     }
   }
 
+  Future<void> _undoLastChange() async {
+    final change = _lastChange;
+    if (change == null) {
+      return;
+    }
+    try {
+      await ref.read(orderRepositoryProvider).undoLastStatus(change.orderId);
+      ref.invalidate(orderDetailProvider(change.orderId));
+      ref.invalidate(orderListProvider);
+      ref.invalidate(customerOrdersProvider);
+      ref.invalidate(homeSummaryProvider);
+      ref.invalidate(readyOrdersProvider);
+      ref.invalidate(overdueOrdersProvider);
+      if (mounted) {
+        setState(() => _lastChange = null);
+      }
+    } on OrderException catch (error) {
+      if (mounted) {
+        setState(() {
+          _lastChange = null;
+          _error = error.message;
+        });
+      }
+    }
+  }
+
   Future<void> _manualLookup() async {
-    final controller = TextEditingController();
     final nota = await showDialog<String>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Ketik nomor nota'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          textCapitalization: TextCapitalization.characters,
-          decoration: const InputDecoration(hintText: 'LDR-20261027-001'),
-          onSubmitted: (value) => Navigator.of(dialogContext).pop(value),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Batal'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(controller.text),
-            child: const Text('Cari'),
-          ),
-        ],
-      ),
+      builder: (_) => const _NotaInputDialog(),
     );
-    controller.dispose();
     if (nota == null || nota.trim().isEmpty || !mounted) {
       return;
     }
@@ -235,32 +238,72 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
                 tooltip: 'Senter',
               ),
             ),
-            Positioned(
-              left: 16,
-              right: 16,
-              bottom: 24,
-              child: Column(
-                children: [
-                  Text(
-                    'Arahkan kamera ke QR pada label kantong.',
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: Colors.white,
-                      shadows: const [
-                        Shadow(blurRadius: 4, color: Colors.black54),
-                      ],
+            if (_result == null)
+              Positioned(
+                left: 16,
+                right: 16,
+                bottom: 24,
+                child: Column(
+                  children: [
+                    if (_lastChange != null) ...[
+                      _UndoBanner(
+                        nota: _lastChange!.nota,
+                        nextLabel: _lastChange!.nextLabel,
+                        onUndo: _undoLastChange,
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    if (_error != null) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.errorContainer,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          _error!,
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onErrorContainer,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    Text(
+                      'Arahkan kamera ke QR pada label kantong.',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.white,
+                        shadows: const [
+                          Shadow(blurRadius: 4, color: Colors.black54),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  FilledButton.tonalIcon(
-                    onPressed: _manualLookup,
-                    icon: const Icon(Icons.keyboard),
-                    label: const Text('Ketik nomor nota'),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    FilledButton.tonalIcon(
+                      onPressed: _manualLookup,
+                      icon: const Icon(Icons.keyboard),
+                      label: const Text('Ketik nomor nota'),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+          if (_result != null)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: ScanResultPanel(
+                result: _result!,
+                onAdvance: () => _advance(_result!),
+                onClose: () => setState(() => _result = null),
               ),
             ),
-          ],
           if (_busy)
             const ColoredBox(
               color: Colors.black38,
@@ -305,6 +348,82 @@ class _PermissionMessage extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _UndoBanner extends StatelessWidget {
+  const _UndoBanner({
+    required this.nota,
+    required this.nextLabel,
+    required this.onUndo,
+  });
+
+  final String nota;
+  final String nextLabel;
+  final VoidCallback onUndo;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              '$nota → $nextLabel',
+              style: theme.textTheme.bodyMedium,
+            ),
+          ),
+          TextButton(onPressed: onUndo, child: const Text('Urungkan')),
+        ],
+      ),
+    );
+  }
+}
+
+class _NotaInputDialog extends StatefulWidget {
+  const _NotaInputDialog();
+
+  @override
+  State<_NotaInputDialog> createState() => _NotaInputDialogState();
+}
+
+class _NotaInputDialogState extends State<_NotaInputDialog> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Ketik nomor nota'),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        textCapitalization: TextCapitalization.characters,
+        decoration: const InputDecoration(hintText: 'LDR-20261027-001'),
+        onSubmitted: (value) => Navigator.of(context).pop(value),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Batal'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(_controller.text),
+          child: const Text('Cari'),
+        ),
+      ],
     );
   }
 }

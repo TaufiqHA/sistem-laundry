@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sistem_manajemen_laundry/features/order/domain/order_models.dart';
 import 'package:sistem_manajemen_laundry/features/order/domain/order_status.dart';
 import 'package:sistem_manajemen_laundry/features/order/domain/scan_result.dart';
-import 'package:sistem_manajemen_laundry/features/scan/presentation/scan_result_sheet.dart';
+import 'package:sistem_manajemen_laundry/features/scan/presentation/scan_result_panel.dart';
 
 void main() {
   OrderDetail detailWith(OrderStatus status) {
@@ -26,16 +26,22 @@ void main() {
     );
   }
 
-  Future<void> pumpSheet(WidgetTester tester, ScanResult result) {
+  Future<void> pumpPanel(WidgetTester tester, ScanResult result) {
     return tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(body: ScanResultSheet(result: result)),
+        home: Scaffold(
+          body: ScanResultPanel(
+            result: result,
+            onAdvance: () {},
+            onClose: () {},
+          ),
+        ),
       ),
     );
   }
 
   testWidgets('order siap menampilkan tombol ubah status', (tester) async {
-    await pumpSheet(
+    await pumpPanel(
       tester,
       ScanResult(ScanOutcome.siap, detail: detailWith(OrderStatus.diterima)),
     );
@@ -48,7 +54,7 @@ void main() {
   testWidgets('order yang sudah diambil tidak menampilkan tombol', (
     tester,
   ) async {
-    await pumpSheet(
+    await pumpPanel(
       tester,
       ScanResult(
         ScanOutcome.sudahDiambil,
@@ -61,7 +67,7 @@ void main() {
   });
 
   testWidgets('QR asing menampilkan penjelasan', (tester) async {
-    await pumpSheet(tester, const ScanResult(ScanOutcome.tidakValid));
+    await pumpPanel(tester, const ScanResult(ScanOutcome.tidakValid));
 
     expect(find.text('QR bukan dari aplikasi ini'), findsOneWidget);
     expect(find.textContaining('bukan buatan aplikasi'), findsOneWidget);

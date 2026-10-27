@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import 'package:sistem_manajemen_laundry/core/widgets/app_shell.dart';
+import 'package:sistem_manajemen_laundry/features/backup/presentation/backup_page.dart';
 import 'package:sistem_manajemen_laundry/features/customer/presentation/customer_detail_page.dart';
 import 'package:sistem_manajemen_laundry/features/customer/presentation/customers_screen.dart';
 import 'package:sistem_manajemen_laundry/features/home/presentation/home_screen.dart';
@@ -25,6 +26,7 @@ abstract final class AppRoutes {
   static const settings = '/pengaturan';
   static const businessProfile = '/pengaturan/profil';
   static const printerSettings = '/pengaturan/printer';
+  static const backup = '/pengaturan/backup';
   static const services = '/layanan';
   static const scan = '/scan';
   static const orderForm = '/order/baru';
@@ -101,6 +103,10 @@ GoRouter createRouter({String initialLocation = AppRoutes.home}) {
       GoRoute(
         path: AppRoutes.printerSettings,
         builder: (context, state) => const PrinterSettingsPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.backup,
+        builder: (context, state) => const BackupPage(),
       ),
       GoRoute(
         path: AppRoutes.services,

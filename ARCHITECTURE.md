@@ -75,6 +75,15 @@ Paket khusus fase lanjut (printer, kamera, PDF, notifikasi) sengaja belum ditamb
 - **Laba** = pemasukan − pengeluaran. Pengeluaran belum punya kolom soft delete, jadi penghapusan bersifat permanen dengan konfirmasi.
 - Grafik dan ekspor PDF/Excel (FR-24) tetap ditunda ke P2.
 
+## Backup dan restore
+
+- Format: ZIP berisi `laundry.sqlite` dan `meta.json` (format versi, skema, tanggal, jumlah order/pelanggan, SHA-256 database).
+- Sebelum dibaca, WAL di-checkpoint agar file utama memuat data terbaru.
+- Saat restore: file divalidasi (ZIP, metadata, skema tidak lebih baru, checksum), backup otomatis dibuat, database ditutup, file diganti, lalu aplikasi wajib ditutup dan dibuka lagi.
+- Lima file backup terakhir disimpan di folder `backups`; file lama dihapus otomatis.
+- Belum ada: enkripsi backup dan notifikasi pengingat terjadwal. Indikator umur backup di beranda sudah berjalan.
+- Catatan: `last_backup_at` disimpan setelah arsip dibuat, jadi database hasil restore menunjukkan "belum pernah backup" sampai backup berikutnya dibuat.
+
 ## Database
 
 | Item | Nilai |

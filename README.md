@@ -4,7 +4,7 @@ Aplikasi Android untuk pemilik laundry kecil: catat order, cetak nota dan label 
 
 ## Status
 
-Fase 1–10 selesai: seluruh alur operasional (order, pembayaran, status, cetak, scan), beranda, dan laporan harian/bulanan dengan pengeluaran serta laba rugi. Cetak dan scan label fisik masih menunggu printer. Berikutnya backup dan restore sesuai [Urutan Pengembangan](Urutan%20Pengembangan.md).
+Fase 1–11 selesai: alur operasional lengkap, laporan, serta backup dan restore yang sudah diuji pulih di perangkat. Cetak dan scan label fisik masih menunggu printer. Berikutnya keamanan dan poles sesuai [Urutan Pengembangan](Urutan%20Pengembangan.md).
 
 ## Menjalankan
 

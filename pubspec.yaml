@@ -7,10 +7,13 @@ environment:
   sdk: ^3.13.5
 
 dependencies:
+  archive: ^4.5.2
+  crypto: ^3.0.8
   cupertino_icons: ^2.0.0
   drift: ^2.35.3
   drift_flutter: ^0.3.1
   esc_pos_utils_plus: ^2.0.4
+  file_picker: ^13.3.0
   flutter:
     sdk: flutter
   flutter_localizations:
@@ -22,6 +25,7 @@ dependencies:
   path_provider: ^2.1.6
   permission_handler: ^12.0.0
   print_bluetooth_thermal: ^1.2.5
+  share_plus: ^13.3.1
 
 dev_dependencies:
   flutter_test:

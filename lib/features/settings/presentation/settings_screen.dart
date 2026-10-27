@@ -108,6 +108,22 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ],
             ),
+            const _SectionHeader('Data'),
+            _SettingsCard(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.backup_outlined),
+                  title: const Text('Backup & restore'),
+                  subtitle: Text(switch (settings.backupAgeDays) {
+                    null => 'Belum pernah backup',
+                    0 => 'Backup terakhir hari ini',
+                    final days => 'Backup terakhir $days hari lalu',
+                  }),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push(AppRoutes.backup),
+                ),
+              ],
+            ),
           ],
         ),
       ),

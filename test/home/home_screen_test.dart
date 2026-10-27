@@ -82,7 +82,6 @@ void main() {
     expect(find.text('Piutang baru'), findsOneWidget);
     expect(find.text('Rp 10.000'), findsOneWidget);
     expect(find.text('Rp 7.500'), findsOneWidget);
-    expect(find.text('Belum pernah backup'), findsOneWidget);
   });
 
   testWidgets('beranda menampilkan cucian siap diambil', (tester) async {

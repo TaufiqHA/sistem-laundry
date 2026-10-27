@@ -65,7 +65,7 @@ Paket khusus fase lanjut (printer, kamera, PDF, notifikasi) sengaja belum ditamb
 - Angka hari ini dihitung dari tanggal lokal: jumlah order memakai `tanggal_masuk`, pemasukan memakai tanggal pembayaran, piutang baru dari order hari ini.
 - "Siap diambil" = status Selesai; "menumpuk" = belum Diambil dan `tanggal_masuk` lebih lama dari batas hari di pengaturan.
 - Setiap perubahan order memanggil `invalidateOrderViews` agar daftar, detail, dan beranda ikut segar tanpa perlu buka-tutup aplikasi.
-- Indikator backup memakai `last_backup_at`; nilainya baru diisi pada Fase 11.
+- Indikator backup memakai `last_backup_at` dan ditampilkan di Pengaturan → Backup & restore, bukan di beranda.
 
 ## Laporan
 

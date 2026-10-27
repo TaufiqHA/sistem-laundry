@@ -8,7 +8,6 @@ import 'package:sistem_manajemen_laundry/features/order/domain/home_summary.dart
 import 'package:sistem_manajemen_laundry/features/order/domain/order_models.dart';
 import 'package:sistem_manajemen_laundry/features/order/presentation/order_providers.dart';
 import 'package:sistem_manajemen_laundry/features/order/presentation/order_widgets.dart';
-import 'package:sistem_manajemen_laundry/features/settings/domain/app_settings.dart';
 import 'package:sistem_manajemen_laundry/features/settings/presentation/settings_providers.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -78,8 +77,6 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            _BackupBanner(settings: settings),
             const SizedBox(height: 24),
             _SectionHeader(
               title: 'Siap diambil',
@@ -231,37 +228,6 @@ class _Stat extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _BackupBanner extends StatelessWidget {
-  const _BackupBanner({required this.settings});
-
-  final AppSettings? settings;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final days = settings?.backupAgeDays;
-    final warning = days == null || days > 7;
-    final text = switch (days) {
-      null => 'Belum pernah backup',
-      0 => 'Backup terakhir hari ini',
-      _ => 'Backup terakhir $days hari lalu',
-    };
-
-    return Card(
-      child: ListTile(
-        leading: Icon(
-          warning ? Icons.backup_outlined : Icons.cloud_done_outlined,
-          color: warning ? theme.colorScheme.error : null,
-        ),
-        title: Text(text),
-        subtitle: const Text(
-          'Data hanya ada di perangkat ini sampai backup dibuat.',
-        ),
-      ),
     );
   }
 }

@@ -27,6 +27,7 @@ class ServiceRepository {
             satuan: row.satuan,
             harga: row.harga,
             aktif: row.aktif,
+            kategori: row.kategori,
           ),
         )
         .toList(growable: false);
@@ -36,6 +37,7 @@ class ServiceRepository {
     required String nama,
     required ServiceUnit satuan,
     required int harga,
+    String? kategori,
   }) {
     return _db
         .into(_db.services)
@@ -44,6 +46,7 @@ class ServiceRepository {
             nama: nama.trim(),
             satuan: satuan,
             harga: harga,
+            kategori: Value(_emptyToNull(kategori)),
           ),
         );
   }
@@ -53,6 +56,7 @@ class ServiceRepository {
     required String nama,
     required ServiceUnit satuan,
     required int harga,
+    String? kategori,
   }) async {
     await (_db.update(
       _db.services,
@@ -61,6 +65,7 @@ class ServiceRepository {
         nama: Value(nama.trim()),
         satuan: Value(satuan),
         harga: Value(harga),
+        kategori: Value(_emptyToNull(kategori)),
       ),
     );
   }
@@ -77,5 +82,10 @@ class ServiceRepository {
     return rows.any(
       (row) => row.id != exceptId && row.nama.trim().toLowerCase() == target,
     );
+  }
+
+  static String? _emptyToNull(String? value) {
+    final trimmed = value?.trim();
+    return trimmed == null || trimmed.isEmpty ? null : trimmed;
   }
 }

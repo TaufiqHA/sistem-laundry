@@ -19,6 +19,7 @@ class ServiceFormSheet extends ConsumerStatefulWidget {
 class _ServiceFormSheetState extends ConsumerState<ServiceFormSheet> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _name;
+  late final TextEditingController _category;
   late final TextEditingController _price;
   late ServiceUnit _unit;
   String? _nameError;
@@ -29,6 +30,7 @@ class _ServiceFormSheetState extends ConsumerState<ServiceFormSheet> {
     super.initState();
     final service = widget.service;
     _name = TextEditingController(text: service?.nama ?? '');
+    _category = TextEditingController(text: service?.kategori ?? '');
     _price = TextEditingController(
       text: service == null ? '' : Rupiah.formatPlain(service.harga),
     );
@@ -38,6 +40,7 @@ class _ServiceFormSheetState extends ConsumerState<ServiceFormSheet> {
   @override
   void dispose() {
     _name.dispose();
+    _category.dispose();
     _price.dispose();
     super.dispose();
   }
@@ -64,13 +67,19 @@ class _ServiceFormSheetState extends ConsumerState<ServiceFormSheet> {
 
       final price = Rupiah.parse(_price.text)!;
       if (widget.service == null) {
-        await repository.create(nama: name, satuan: _unit, harga: price);
+        await repository.create(
+          nama: name,
+          satuan: _unit,
+          harga: price,
+          kategori: _category.text,
+        );
       } else {
         await repository.update(
           id: widget.service!.id,
           nama: name,
           satuan: _unit,
           harga: price,
+          kategori: _category.text,
         );
       }
       if (mounted) {
@@ -132,6 +141,34 @@ class _ServiceFormSheetState extends ConsumerState<ServiceFormSheet> {
                   }
                   return null;
                 },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _category,
+                textCapitalization: TextCapitalization.words,
+                textInputAction: TextInputAction.next,
+                decoration: const InputDecoration(
+                  labelText: 'Kategori (opsional)',
+                  hintText: 'Contoh: Cuci Kering atau Ekspres',
+                ),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                children: [
+                  for (final category in const [
+                    'Cuci Kering',
+                    'Cuci Setrika',
+                    'Setrika Saja',
+                    'Selimut',
+                    'Ekspres',
+                  ])
+                    ActionChip(
+                      label: Text(category),
+                      onPressed: () =>
+                          setState(() => _category.text = category),
+                    ),
+                ],
               ),
               const SizedBox(height: 20),
               Text('Satuan', style: theme.textTheme.labelLarge),

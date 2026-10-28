@@ -7,6 +7,7 @@ class LaundryService {
     required this.satuan,
     required this.harga,
     required this.aktif,
+    this.kategori,
   });
 
   final int id;
@@ -14,4 +15,5 @@ class LaundryService {
   final ServiceUnit satuan;
   final int harga;
   final bool aktif;
+  final String? kategori;
 }

@@ -23,6 +23,7 @@ void main() {
       nama: 'Cuci Kering',
       satuan: ServiceUnit.kg,
       harga: 7000,
+      kategori: 'Cuci Kering',
     );
 
     final services = await repository.list();
@@ -32,6 +33,7 @@ void main() {
     expect(services.single.satuan, ServiceUnit.kg);
     expect(services.single.harga, 7000);
     expect(services.single.aktif, isTrue);
+    expect(services.single.kategori, 'Cuci Kering');
   });
 
   test('daftar untuk order hanya berisi layanan aktif', () async {

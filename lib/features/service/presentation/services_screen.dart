@@ -139,8 +139,11 @@ class _ServiceTile extends StatelessWidget {
           ),
         ),
         subtitle: Text(
-          '${Rupiah.format(service.harga)} / ${service.satuan.label}'
-          '${service.aktif ? '' : ' · Nonaktif'}',
+          [
+            if (service.kategori != null) service.kategori!,
+            '${Rupiah.format(service.harga)} / ${service.satuan.label}'
+                '${service.aktif ? '' : ' · Nonaktif'}',
+          ].join(' · '),
         ),
         trailing: Switch(value: service.aktif, onChanged: onActiveChanged),
       ),

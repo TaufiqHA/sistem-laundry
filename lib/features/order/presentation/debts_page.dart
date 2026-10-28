@@ -9,6 +9,9 @@ import 'package:sistem_manajemen_laundry/core/utils/tanggal.dart';
 import 'package:sistem_manajemen_laundry/core/widgets/empty_state.dart';
 import 'package:sistem_manajemen_laundry/features/order/domain/payment.dart';
 import 'package:sistem_manajemen_laundry/features/order/presentation/payment_providers.dart';
+import 'package:sistem_manajemen_laundry/features/settings/presentation/settings_providers.dart';
+import 'package:sistem_manajemen_laundry/features/whatsapp/domain/whatsapp_message.dart';
+import 'package:sistem_manajemen_laundry/features/whatsapp/presentation/whatsapp_actions.dart';
 
 class DebtsPage extends ConsumerStatefulWidget {
   const DebtsPage({super.key});
@@ -19,6 +22,18 @@ class DebtsPage extends ConsumerStatefulWidget {
 
 class _DebtsPageState extends ConsumerState<DebtsPage> {
   DebtSort _sort = DebtSort.nominal;
+
+  Future<void> _sendReminder(CustomerDebt debt) async {
+    final settings = await ref.read(settingsRepositoryProvider).load();
+    if (!mounted) {
+      return;
+    }
+    await WhatsAppActions.send(
+      context,
+      phone: debt.telepon,
+      message: WhatsAppMessage.debt(debt, businessName: settings.displayName),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,9 +122,25 @@ class _DebtsPageState extends ConsumerState<DebtsPage> {
                                 : debt.nama.substring(0, 1).toUpperCase(),
                           ),
                         ),
-                        title: Text(
-                          debt.nama,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        title: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                debt.nama,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              Rupiah.format(debt.piutang),
+                              style: Theme.of(context).textTheme.bodyLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: Theme.of(context).colorScheme.error,
+                                  ),
+                            ),
+                          ],
                         ),
                         subtitle: Text(
                           '${PhoneNumber.display(debt.telepon)}\n'
@@ -117,13 +148,10 @@ class _DebtsPageState extends ConsumerState<DebtsPage> {
                           '${formatTanggal(debt.sejak)}',
                         ),
                         isThreeLine: true,
-                        trailing: Text(
-                          Rupiah.format(debt.piutang),
-                          style: Theme.of(context).textTheme.bodyLarge
-                              ?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: Theme.of(context).colorScheme.error,
-                              ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.chat_outlined),
+                          tooltip: 'Pengingat WhatsApp',
+                          onPressed: () => _sendReminder(debt),
                         ),
                       ),
                     );

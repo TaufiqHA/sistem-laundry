@@ -2,7 +2,7 @@
 
 Dokumen ini berisi urutan pengerjaan, bukan jadwal. Satu fase diselesaikan dan bisa dijalankan di HP sebelum fase berikutnya dimulai, kecuali ditandai boleh paralel. Rujukan `FR-xx` mengacu ke PRD.
 
-**Status:** Fase 1–12 selesai. Fase 0.3, Gerbang 4, dan Gerbang 5 menunggu perangkat. Berikutnya Fase 13.
+**Status:** Fase 1–12 selesai. Fase 13 sebagian: WhatsApp, nota PDF, dan kategori/ekspres selesai; lisensi, poin, bulk status, dan keygen belum. Fase 0.3, Gerbang 4, dan Gerbang 5 menunggu perangkat.
 
 ## Prinsip urutan
 

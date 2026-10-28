@@ -14,7 +14,11 @@ import 'package:sistem_manajemen_laundry/features/order/presentation/order_provi
 import 'package:sistem_manajemen_laundry/features/order/presentation/order_widgets.dart';
 import 'package:sistem_manajemen_laundry/features/order/presentation/payment_providers.dart';
 import 'package:sistem_manajemen_laundry/features/order/presentation/payment_sheet.dart';
+import 'package:sistem_manajemen_laundry/features/printer/presentation/pdf_actions.dart';
 import 'package:sistem_manajemen_laundry/features/printer/presentation/print_actions.dart';
+import 'package:sistem_manajemen_laundry/features/settings/presentation/settings_providers.dart';
+import 'package:sistem_manajemen_laundry/features/whatsapp/domain/whatsapp_message.dart';
+import 'package:sistem_manajemen_laundry/features/whatsapp/presentation/whatsapp_actions.dart';
 
 class OrderDetailPage extends ConsumerWidget {
   const OrderDetailPage({required this.orderId, super.key});
@@ -128,6 +132,16 @@ class OrderDetailPage extends ConsumerWidget {
       const PopupMenuItem(value: 'receipt', child: Text('Cetak nota')),
       const PopupMenuItem(value: 'label', child: Text('Cetak label')),
       const PopupMenuItem(value: 'both', child: Text('Cetak nota dan label')),
+      const PopupMenuItem(value: 'pdf', child: Text('Bagikan nota PDF')),
+      const PopupMenuDivider(),
+      const PopupMenuItem(
+        value: 'wa_invoice',
+        child: Text('Kirim nota WhatsApp'),
+      ),
+      const PopupMenuItem(
+        value: 'wa_ready',
+        child: Text('Kirim "siap diambil"'),
+      ),
       const PopupMenuDivider(),
       const PopupMenuItem(value: 'edit', child: Text('Ubah order')),
       const PopupMenuItem(value: 'cancel', child: Text('Batalkan order')),
@@ -161,6 +175,9 @@ class OrderDetailPage extends ConsumerWidget {
         detail: detail,
         target: PrintTarget.both,
       ),
+      'pdf' => PdfActions.shareReceipt(context, ref, detail),
+      'wa_invoice' => _whatsApp(context, ref, detail, invoice: true),
+      'wa_ready' => _whatsApp(context, ref, detail, invoice: false),
       'edit' => _edit(context, ref),
       'cancel' => _cancel(context, ref, detail),
       _ => Future<void>.value(),
@@ -278,6 +295,26 @@ class OrderDetailPage extends ConsumerWidget {
             .showSnackBar(SnackBar(content: Text(error.message)));
       }
     }
+  }
+
+  Future<void> _whatsApp(
+    BuildContext context,
+    WidgetRef ref,
+    OrderDetail detail, {
+    required bool invoice,
+  }) async {
+    final settings = await ref.read(settingsRepositoryProvider).load();
+    final message = invoice
+        ? WhatsAppMessage.invoice(detail, businessName: settings.displayName)
+        : WhatsAppMessage.ready(detail, businessName: settings.displayName);
+    if (!context.mounted) {
+      return;
+    }
+    await WhatsAppActions.send(
+      context,
+      phone: detail.order.customerTelepon,
+      message: message,
+    );
   }
 
   Future<void> _edit(BuildContext context, WidgetRef ref) async {

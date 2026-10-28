@@ -36,7 +36,8 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.enterText(find.byType(TextFormField).at(0), 'Cuci Kering');
-    await tester.enterText(find.byType(TextFormField).at(1), '7000');
+    await tester.enterText(find.byType(TextFormField).at(2), '7000');
+    await tester.ensureVisible(find.widgetWithText(FilledButton, 'Simpan'));
     await tester.tap(find.widgetWithText(FilledButton, 'Simpan'));
     await tester.pumpAndSettle();
 
@@ -51,7 +52,8 @@ void main() {
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextFormField).at(0), name);
-      await tester.enterText(find.byType(TextFormField).at(1), '5000');
+      await tester.enterText(find.byType(TextFormField).at(2), '5000');
+      await tester.ensureVisible(find.widgetWithText(FilledButton, 'Simpan'));
       await tester.tap(find.widgetWithText(FilledButton, 'Simpan'));
       await tester.pumpAndSettle();
     }

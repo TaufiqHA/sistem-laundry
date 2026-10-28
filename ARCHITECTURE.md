@@ -104,6 +104,12 @@ Paket khusus fase lanjut (printer, kamera, PDF, notifikasi) sengaja belum ditamb
 
 Kenaikan ukuran berasal dari `mobile_scanner` (ML Kit) dan `file_picker`. Arm64 masih di bawah batas, tapi tinggal 0,4 MB; fitur berikutnya perlu memantau ini atau memakai ML Kit tanpa bundel.
 
+## WhatsApp, PDF, dan kategori
+
+- Pesan WhatsApp disusun sebagai teks murni di `WhatsAppMessage`, lalu diubah menjadi tautan `wa.me` dengan nomor `62`. Kalau WhatsApp tidak tersedia, pesan disalin ke papan klip.
+- Nota PDF dibuat dengan paket `pdf` (A5) lalu dibagikan lewat share sheet; tidak bergantung pada printer.
+- Kategori layanan sekarang diisi bebas (dengan saran cepat). "Ekspres" diperlakukan sebagai layanan terpisah dengan harga sendiri, bukan kolom tambahan di order.
+
 ## Database
 
 | Item | Nilai |

@@ -50,6 +50,12 @@ class SettingsRepository {
 
   Future<void> setInt(String key, int value) => set(key, '$value');
 
+  Future<void> remove(String key) async {
+    await (_db.delete(
+      _db.settings,
+    )..where((table) => table.kunci.equals(key))).go();
+  }
+
   Future<void> setDateTime(String key, DateTime value) {
     return set(key, value.toUtc().toIso8601String());
   }

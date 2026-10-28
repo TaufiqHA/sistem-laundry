@@ -84,6 +84,26 @@ Paket khusus fase lanjut (printer, kamera, PDF, notifikasi) sengaja belum ditamb
 - Belum ada: enkripsi backup dan notifikasi pengingat terjadwal. Indikator umur backup di beranda sudah berjalan.
 - Catatan: `last_backup_at` disimpan setelah arsip dibuat, jadi database hasil restore menunjukkan "belum pernah backup" sampai backup berikutnya dibuat.
 
+## Keamanan
+
+- PIN 6 angka, disimpan sebagai SHA-256 bergaram dengan 1.000 iterasi. PIN asli tidak pernah disimpan.
+- Kunci aktif saat aplikasi dibuka dan saat kembali dari latar belakang setelah 5 menit.
+- Layar kunci berupa overlay di atas aplikasi, jadi state navigasi tidak hilang saat membuka kunci.
+- Salah PIN 5 kali memberi jeda 30 detik.
+- Biometrik belum diimplementasikan; `local_auth` dan `FlutterFragmentActivity` akan ditambahkan saat fitur itu dikerjakan.
+
+## Performa dan ukuran
+
+| Metrik | Hasil |
+| --- | --- |
+| Cold start (release, Waydroid) | ±310 ms setelah peluncuran pertama |
+| Peluncuran pertama setelah instal | ±3,4 detik (pemanasan dex) |
+| APK arm64 | 29,6 MB (batas PRD 30 MB) |
+| APK armeabi-v7a | 25,7 MB |
+| APK x86_64 | 32,0 MB (khusus emulator) |
+
+Kenaikan ukuran berasal dari `mobile_scanner` (ML Kit) dan `file_picker`. Arm64 masih di bawah batas, tapi tinggal 0,4 MB; fitur berikutnya perlu memantau ini atau memakai ML Kit tanpa bundel.
+
 ## Database
 
 | Item | Nilai |

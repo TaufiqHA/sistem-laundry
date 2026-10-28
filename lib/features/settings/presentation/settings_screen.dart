@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:sistem_manajemen_laundry/core/router/app_router.dart';
+import 'package:sistem_manajemen_laundry/features/security/presentation/pin_dialogs.dart';
+import 'package:sistem_manajemen_laundry/features/security/presentation/security_providers.dart';
 import 'package:sistem_manajemen_laundry/features/settings/domain/app_settings.dart';
 import 'package:sistem_manajemen_laundry/features/settings/presentation/settings_providers.dart';
 
@@ -108,6 +110,40 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ],
             ),
+            const _SectionHeader('Keamanan'),
+            _SettingsCard(
+              children: [
+                if (ref.watch(hasPinProvider).value ?? false) ...[
+                  ListTile(
+                    leading: const Icon(Icons.password),
+                    title: const Text('Ubah PIN'),
+                    subtitle: const Text('Ganti 6 angka pembuka aplikasi'),
+                    onTap: () => _setupPin(context),
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.lock_open_outlined),
+                    title: const Text('Nonaktifkan PIN'),
+                    subtitle: const Text('Aplikasi tidak meminta PIN lagi'),
+                    onTap: () => _disablePin(context),
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.lock_outline),
+                    title: const Text('Kunci sekarang'),
+                    subtitle: const Text('Minta PIN begitu layar ditutup'),
+                    onTap: () =>
+                        ref.read(lockControllerProvider.notifier).lock(),
+                  ),
+                ] else
+                  ListTile(
+                    leading: const Icon(Icons.lock_outline),
+                    title: const Text('Aktifkan PIN'),
+                    subtitle: const Text('Kunci aplikasi dengan 6 angka'),
+                    onTap: () => _setupPin(context),
+                  ),
+              ],
+            ),
             const _SectionHeader('Data'),
             _SettingsCard(
               children: [
@@ -203,6 +239,22 @@ class SettingsScreen extends ConsumerWidget {
       ref,
       () => ref.read(settingsRepositoryProvider).setLabelSize(value),
     );
+  }
+
+  Future<void> _setupPin(BuildContext context) async {
+    final saved = await showPinSetupDialog(context);
+    if (saved && context.mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('PIN aktif.')));
+    }
+  }
+
+  Future<void> _disablePin(BuildContext context) async {
+    final removed = await showPinDisableDialog(context);
+    if (removed && context.mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('PIN dinonaktifkan.')));
+    }
   }
 
   Future<void> _save(

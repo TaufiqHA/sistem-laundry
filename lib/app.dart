@@ -7,6 +7,7 @@ import 'package:sistem_manajemen_laundry/core/l10n/app_strings.dart';
 import 'package:sistem_manajemen_laundry/core/router/app_router.dart';
 import 'package:sistem_manajemen_laundry/core/theme/app_theme.dart';
 import 'package:sistem_manajemen_laundry/core/theme/theme_provider.dart';
+import 'package:sistem_manajemen_laundry/features/security/presentation/app_lock_gate.dart';
 
 class LaundryApp extends ConsumerStatefulWidget {
   const LaundryApp({super.key, this.initialLocation = AppRoutes.home});
@@ -41,6 +42,8 @@ class _LaundryAppState extends ConsumerState<LaundryApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       routerConfig: _router,
+      builder: (context, child) =>
+          AppLockGate(child: child ?? const SizedBox.shrink()),
     );
   }
 }

@@ -77,14 +77,14 @@ class ServicesScreen extends ConsumerWidget {
     WidgetRef ref,
     LaundryService? service,
   ) async {
-    final saved = await showModalBottomSheet<bool>(
+    final saved = await showModalBottomSheet<LaundryService>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       showDragHandle: true,
       builder: (_) => ServiceFormSheet(service: service),
     );
-    if (saved ?? false) {
+    if (saved != null) {
       ref.invalidate(serviceListProvider);
     }
   }

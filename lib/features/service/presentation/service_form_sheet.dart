@@ -66,12 +66,24 @@ class _ServiceFormSheetState extends ConsumerState<ServiceFormSheet> {
       }
 
       final price = Rupiah.parse(_price.text)!;
+      final kategori = _category.text.trim().isEmpty
+          ? null
+          : _category.text.trim();
+      final LaundryService saved;
       if (widget.service == null) {
-        await repository.create(
+        final id = await repository.create(
           nama: name,
           satuan: _unit,
           harga: price,
-          kategori: _category.text,
+          kategori: kategori,
+        );
+        saved = LaundryService(
+          id: id,
+          nama: name,
+          satuan: _unit,
+          harga: price,
+          aktif: true,
+          kategori: kategori,
         );
       } else {
         await repository.update(
@@ -79,11 +91,19 @@ class _ServiceFormSheetState extends ConsumerState<ServiceFormSheet> {
           nama: name,
           satuan: _unit,
           harga: price,
-          kategori: _category.text,
+          kategori: kategori,
+        );
+        saved = LaundryService(
+          id: widget.service!.id,
+          nama: name,
+          satuan: _unit,
+          harga: price,
+          aktif: widget.service!.aktif,
+          kategori: kategori,
         );
       }
       if (mounted) {
-        Navigator.of(context).pop(true);
+        Navigator.of(context).pop(saved);
       }
     } on Exception {
       if (mounted) {

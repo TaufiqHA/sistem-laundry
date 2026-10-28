@@ -22,11 +22,13 @@ void main() {
     await db.close();
   });
 
-  Future<void> seed() async {
+  Future<void> seed({bool withService = true}) async {
     await CustomerRepository(db)
         .create(nama: 'Ibu Sari', telepon: '081234567890');
-    await ServiceRepository(db)
-        .create(nama: 'Cuci Kering', satuan: ServiceUnit.kg, harga: 7000);
+    if (withService) {
+      await ServiceRepository(db)
+          .create(nama: 'Cuci Kering', satuan: ServiceUnit.kg, harga: 7000);
+    }
   }
 
   Future<void> pumpForm(WidgetTester tester) async {
@@ -84,5 +86,34 @@ void main() {
     expect(orders, hasLength(1));
     expect(orders.single.total, 7000);
     expect(orders.single.nomorNota, endsWith('-001'));
+  });
+
+  testWidgets('membuat layanan baru langsung dari halaman order', (
+    tester,
+  ) async {
+    await seed(withService: false);
+    await pumpForm(tester);
+
+    expect(find.textContaining('Belum ada layanan aktif'), findsOneWidget);
+    expect(find.text('Buat layanan baru'), findsOneWidget);
+
+    await tester.tap(find.text('Buat layanan baru'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextFormField).at(0), 'Cuci Setrika');
+    await tester.enterText(find.byType(TextFormField).at(2), '9000');
+    await tester.ensureVisible(find.widgetWithText(FilledButton, 'Simpan'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Simpan'));
+    await tester.pumpAndSettle();
+
+    // Dialog jumlah langsung muncul untuk layanan baru.
+    await tester.tap(find.widgetWithText(FilledButton, 'Tambahkan'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('1 item'), findsOneWidget);
+    expect(find.text('Rp 9.000'), findsWidgets);
+
+    final services = await ServiceRepository(db).list();
+    expect(services.map((service) => service.nama), contains('Cuci Setrika'));
   });
 }

@@ -14,6 +14,7 @@ import 'package:sistem_manajemen_laundry/features/order/domain/order_models.dart
 import 'package:sistem_manajemen_laundry/features/order/presentation/order_pickers.dart';
 import 'package:sistem_manajemen_laundry/features/order/presentation/order_providers.dart';
 import 'package:sistem_manajemen_laundry/features/service/domain/laundry_service.dart';
+import 'package:sistem_manajemen_laundry/features/service/presentation/service_form_sheet.dart';
 
 class OrderFormPage extends ConsumerWidget {
   const OrderFormPage({super.key, this.orderId});
@@ -147,33 +148,93 @@ class _OrderFormBodyState extends ConsumerState<OrderFormBody> {
             ],
           ),
           const SizedBox(height: 8),
-          if (_items.isEmpty)
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(
-                  'Belum ada layanan. Tambahkan minimal satu layanan.',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+          ref
+              .watch(activeServicesProvider)
+              .when(
+                loading: () => const Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Center(child: CircularProgressIndicator()),
                   ),
                 ),
+                error: (error, stack) => Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(
+                      'Gagal memuat layanan.',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.error,
+                      ),
+                    ),
+                  ),
+                ),
+                data: (services) {
+                  if (services.isEmpty) {
+                    return Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              'Belum ada layanan aktif. Buat layanan pertama '
+                              'untuk mulai mencatat order.',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            FilledButton.icon(
+                              onPressed: _createServiceAndAdd,
+                              icon: const Icon(Icons.add),
+                              label: const Text('Buat layanan baru'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (_items.isEmpty)
+                        Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Text(
+                              'Belum ada layanan di order ini.',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        ),
+                      for (var index = 0; index < _items.length; index++)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: _ItemCard(
+                            item: _items[index],
+                            onTap: () => _editItem(index),
+                            onRemove: () =>
+                                setState(() => _items.removeAt(index)),
+                          ),
+                        ),
+                      const SizedBox(height: 4),
+                      OutlinedButton.icon(
+                        onPressed: _addItem,
+                        icon: const Icon(Icons.add),
+                        label: const Text('Tambah layanan'),
+                      ),
+                      TextButton.icon(
+                        onPressed: _createServiceAndAdd,
+                        icon: const Icon(Icons.playlist_add),
+                        label: const Text('Buat layanan baru'),
+                      ),
+                    ],
+                  );
+                },
               ),
-            ),
-          for (var index = 0; index < _items.length; index++)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: _ItemCard(
-                item: _items[index],
-                onTap: () => _editItem(index),
-                onRemove: () => setState(() => _items.removeAt(index)),
-              ),
-            ),
-          const SizedBox(height: 4),
-          OutlinedButton.icon(
-            onPressed: _addItem,
-            icon: const Icon(Icons.add),
-            label: const Text('Tambah layanan'),
-          ),
           const SizedBox(height: 24),
           Text('Detail', style: theme.textTheme.titleMedium),
           const SizedBox(height: 8),
@@ -298,7 +359,27 @@ class _OrderFormBodyState extends ConsumerState<OrderFormBody> {
     if (service == null || !mounted) {
       return;
     }
+    await _askQuantityAndAdd(service);
+  }
 
+  /// Dipakai saat belum ada layanan aktif: buat layanan lalu langsung
+  /// tawarkan jumlah agar kasir tidak perlu mencari ulang.
+  Future<void> _createServiceAndAdd() async {
+    final service = await showModalBottomSheet<LaundryService>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      builder: (_) => const ServiceFormSheet(),
+    );
+    if (service == null || !mounted) {
+      return;
+    }
+    ref.invalidate(activeServicesProvider);
+    await _askQuantityAndAdd(service);
+  }
+
+  Future<void> _askQuantityAndAdd(LaundryService service) async {
     final milli = await showDialog<int>(
       context: context,
       builder: (_) => QuantityDialog(
